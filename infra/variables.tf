@@ -54,6 +54,28 @@ variable "api_key_param_name" {
   default     = "/qmc/dev/api_key"
 }
 
+variable "table_capacity" {
+  description = "Provisioned DynamoDB read and write units for the jobs table. The default 10, plus the index's 5, uses 15 of the 25 always-free units. A second, short-lived copy (for example a demo stack) sets 5 so both copies together stay at 25."
+  type        = number
+  default     = 10
+
+  validation {
+    condition     = var.table_capacity >= 1 && var.table_capacity <= 25
+    error_message = "table_capacity must be between 1 and 25 (the always-free allowance)."
+  }
+}
+
+variable "index_capacity" {
+  description = "Provisioned DynamoDB read and write units for the by_created index."
+  type        = number
+  default     = 5
+
+  validation {
+    condition     = var.index_capacity >= 1 && var.index_capacity <= 25
+    error_message = "index_capacity must be between 1 and 25 (the always-free allowance)."
+  }
+}
+
 variable "max_paths" {
   description = "Largest number of simulated paths one job may ask for."
   type        = number

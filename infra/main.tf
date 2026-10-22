@@ -35,8 +35,10 @@ data "archive_file" "lambda" {
 }
 
 module "data" {
-  source = "./modules/data"
-  name   = local.name
+  source         = "./modules/data"
+  name           = local.name
+  table_capacity = var.table_capacity
+  index_capacity = var.index_capacity
 }
 
 module "observability" {
