@@ -17,7 +17,8 @@ number service, splits into parallel pieces (*shards*), and stores everything ne
 | Research (`docs/research.md`) | Done |
 | Requirements (`docs/PRD.md`, `docs/REQUIREMENTS_TRACE.md`) | Done |
 | Design (`docs/DESIGN.md`) | Approved |
-| Build | In progress (milestone M0: skeleton and core engine) |
+| Build, milestone M0 (engine, mock Qrypt client, CI, Terraform modules) | Done: 107 tests pass; Terraform checks clean |
+| Build, milestone M1 (the two functions, secrets script, command-line client) | Next |
 | Deployed endpoint | Not deployed yet. No AWS resources have been created. |
 
 ## AWS account, cost and grading window
@@ -42,8 +43,42 @@ number service, splits into parallel pieces (*shards*), and stores everything ne
 | [docs/REQUIREMENTS_TRACE.md](docs/REQUIREMENTS_TRACE.md) | Every requirement with its source line, status and evidence |
 | [docs/DESIGN.md](docs/DESIGN.md) | Architecture, diagram, data model, seed flow, error handling, measurement, security, tests, cost |
 | [AGENTS.md](AGENTS.md) | How coding agents should work in this repository |
+| [src/qmc/](src/qmc/) | The pricing engine: input checks, seed derivation, simulation, totals, Black-Scholes, Qrypt client |
+| [tests/](tests/) | Unit tests, all runnable without AWS or a Qrypt token |
+| [infra/](infra/) | Terraform: one root module plus modules `data`, `workers`, `api`, `observability`, `budget` |
+| [.gitlab-ci.yml](.gitlab-ci.yml) | The CI pipeline (checks run by GitLab on every push) |
+| [.env.example](.env.example) | The local settings file template (copy to `.env`; never commit `.env`) |
 
-Coming with the build: `AI_USAGE.md`, `.env.example`, a grader quick-start in this README, and the cost note.
+Coming with the build: `AI_USAGE.md`, a grader quick-start in this README, and the cost note with the Budget screenshot.
+
+## Running the checks locally
+
+Needs Python 3.13. The engine uses only Python's standard library; the test tools are in
+`requirements-dev.txt`.
+
+```sh
+make venv        # create .venv and install the test tools
+make test        # unit tests with a coverage report (fails below 80%)
+make lint        # ruff: style and common-bug checks
+make check       # everything CI runs: the above plus terraform fmt and validate, tflint, checkov
+                 # (needs terraform, tflint and checkov installed)
+```
+
+*Coverage* is the share of code lines the tests run. *TFLint* checks Terraform for mistakes `terraform
+validate` misses. *Checkov* scans Terraform for insecure settings; every rule it is told to skip has a
+comment saying why. No test calls AWS or Qrypt: Qrypt is replaced by a mock (a stand-in that returns a fixed
+block of bytes).
+
+## Deployment settings
+
+Copy `infra/terraform.tfvars.example` to `infra/terraform.tfvars` (git ignores it) and set `alert_email`,
+the address that gets budget and alarm emails. AWS sends a confirmation email after the first deploy; the
+link in it must be clicked before alerts arrive.
+
+**Concurrency** (how many copies of a function may run at once): the new account's Lambda limit is 10,
+and AWS refuses per-function reservations at that size. Until the requested increase to 1,000 is granted,
+the deployment uses `reserve_concurrency = false` and `worker_concurrency = 5`: the queue starts at most 5
+workers at once, leaving room for the api function.
 
 ## Grader quick-start
 

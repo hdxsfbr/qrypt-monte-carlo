@@ -1,6 +1,7 @@
 # Design: Quantum-Seeded Monte Carlo Platform on AWS
 
-Status: proposal for approval. Nothing is built or deployed yet. Requirement IDs (FR-, EC-, NFR-, SEC-,
+Status: approved. Milestone M0 is built (the pricing engine, the mock Qrypt client, CI and the Terraform
+modules); nothing is deployed yet. Requirement IDs (FR-, EC-, NFR-, SEC-,
 CQ-, D-) refer to `docs/PRD.md`. Terms are defined in the PRD glossary and in `docs/research.md`.
 
 ## 1. Summary of the main decisions
@@ -17,7 +18,7 @@ CQ-, D-) refer to `docs/PRD.md`. Terms are defined in the PRD glossary and in `d
 | Database | One DynamoDB table (provisioned 10 read / 10 write units) plus one index (5/5) | 15 of the 25 free units; on-demand is not free |
 | Metrics | CloudWatch Embedded Metric Format (metrics written as structured log lines), one fixed dimension | No metric API calls; 6 custom metrics out of 10 free |
 | AWS account | Dedicated account `144249522427` on the AWS Free plan, CLI profile `qmc` | Nothing else runs there; usage beyond the always-free allowances comes out of $100 of credits instead of being billed |
-| Budget | $1/month for the whole account, alerts to SNS and to the `alert_email` address | Required by the brief; on the Free plan it warns before any credits are spent |
+| Budget | $1/month for the whole account, alerts to SNS and to the `alert_email` address; credits are left out of the count | Required by the brief; because credits are left out, it warns before any of the $100 is spent |
 | Secrets | Qrypt token and API key created in SSM out-of-band with a helper script; Terraform only knows their *names* | Values never enter Terraform state or the repo |
 
 ## 2. Architecture
@@ -92,8 +93,18 @@ Main variables: `environment`, `alert_email` (required, no default: the address 
 `qrypt_param_name`, `api_key_param_name`, `max_paths` (10,000,000), `max_shards` (20),
 `max_paths_per_shard` (500,000), `api_concurrency` (5),
 `worker_concurrency` (20), `reserve_concurrency` (true), `worker_timeout_s` (60), `max_receive_count` (3), `log_retention_days` (14), `budget_limit_usd` (1),
-`enable_fault_injection` (false). Lambda code is zipped by Terraform's `archive_file`, which gives the same
+`enable_fault_injection` (false), `allowed_account_ids` (`["144249522427"]`: Terraform refuses to run against any
+other account, so a wrong CLI profile cannot touch the old paid account). Functions run on x86-64, the same
+processor type as the build machines, so local and deployed numbers match. Lambda code is zipped by Terraform's `archive_file`, which gives the same
 hash for the same files, so an unchanged repo shows no drift. Local state, git-ignored.
+
+Per-deployment values (for now only `alert_email`, plus the concurrency settings while the quota is 10)
+go in `infra/terraform.tfvars`, which git ignores. `infra/terraform.tfvars.example` is the committed
+template with a placeholder address.
+
+Custom metrics (namespace `QMC`, one dimension `Environment`): `JobsSubmitted`, `PathsSimulated`,
+`EntropyKiB`, `ShardFailures`, `QryptErrors`, `ShardDurationMs`. Alarms: worker errors, dead-letter queue
+depth above 0, api errors, Qrypt errors; each emails through the SNS topic.
 
 ## 4. Data model (one DynamoDB table `qmc-<env>-jobs`)
 | Item | Key (PK / SK) | Main attributes |
@@ -123,6 +134,13 @@ Job ids are random UUIDs (unique ids), not seeds, so ids reveal nothing.
    (`float.hex`) and records `bit_identical: true/false`.
 
 Same seed + same parameters + same code version + same runtime + same summation order = the same bits.
+
+*Why "same runtime" matters.* The random numbers themselves (`random()`) are pure integer arithmetic and
+are the same on every machine. The maths functions used afterwards (`exp`, `log`, `cos`, `sqrt`) come from
+the platform's maths library, which may round the very last bit differently on another processor or
+operating system. A replay runs on the same deployed functions as the original, so it is bit-identical.
+The committed "golden" test values were checked to match exactly on two Linux x86-64 machines; on a
+different platform they could differ in the last bit while the price stays correct.
 If the code version ever changes, `algo_version` changes too, and a replay uses the stored version's code
 path (only v1 exists for now).
 
@@ -136,7 +154,7 @@ path (only v1 exists for now).
 | EC-5 Qrypt burst | A DynamoDB counter per 10-second window allows at most 25 Qrypt calls per window (margin under 30); above it, 429 with `Retry-After`. The api function's reserved concurrency (5) also caps parallel calls. |
 | EC-6 Cost runaway | `max_paths` 10,000,000 and `max_shards` 20 per job; worker reserved concurrency 20; api reserved concurrency 5. The queue trigger's *maximum concurrency* (how many worker copies the queue may start at once) is set to the same 20, so the queue never starts more workers than are allowed and throttling cannot push healthy shards toward the DLQ. Over-limit requests rejected with 400. |
 | EC-6 account limit | The new account's Lambda concurrency limit is **10**, and AWS only allows reserved concurrency when at least 100 units stay unreserved, so reservations fail until the quota is raised to 1,000 (a free Service Quotas request). Terraform therefore has a documented switch `reserve_concurrency` (default `true`). If the quota is still 10 at deploy time, set it to `false` and set `worker_concurrency = 5`: the queue trigger's maximum concurrency then caps workers at 5, the account limit caps everything at 10, and the api keeps at least 5 copies free. The README states which setting the deployed stack uses. |
-| EC-7 Invalid input | Strict validation: all seven fields required, numeric (booleans and strings rejected), finite; `S0`, `K`, `sigma`, `T` > 0; `paths`, `shards` whole numbers ≥ 1; `shards ≤ paths`; limits above; unknown fields rejected; body ≤ 4 KB. 400 with a message naming the field. |
+| EC-7 Invalid input | Strict validation: all seven fields required, numeric (booleans and strings rejected), finite; `S0`, `K`, `sigma`, `T` > 0 (also `sigma` ≤ 5, `T` ≤ 100 years, \|`r`\| ≤ 1, to catch typos); `paths` a whole number ≥ 2 (a standard error needs at least two paths); `shards` a whole number ≥ 1; `shards ≤ paths`; limits above; unknown fields rejected; body ≤ 4 KB. 400 with a message naming the field. |
 | EC-8 Teardown, drift | Log groups are created by Terraform (so destroy removes them); deletion protection off; deterministic zips; both Function URL permissions in Terraform. Checked with `terraform plan -detailed-exitcode` after apply and an AWS resource-tag search after destroy. |
 | EC-9 First run | `GET /jobs` queries the index and returns `[]`; unknown id → 404 `{"error": "job not found", "job_id": ...}`. |
 | CQ-4 | Each handler has a top-level guard: unexpected errors become 500 `{"error": "internal error", "request_id": ...}` with the details logged, never the token. |
@@ -187,7 +205,7 @@ likely cause rather than tuning in a loop.
   - seeds: RFC 5869 HKDF test vectors; 1,000 shard seeds distinct; same master gives the same seeds;
     different masters differ;
   - simulation: S0=100, K=100, r=0.05, sigma=0.2, T=1, **1,000,000 paths**: estimate within 3 standard
-    errors of Black-Scholes 10.4506 (about 2 seconds locally); fixed-seed "golden" values so any change in
+    errors of Black-Scholes 10.4506 (well under a second on the build machines); fixed-seed "golden" values so any change in
     the numbers is caught;
   - aggregation: matches a single-pass calculation; empty and single-path edge cases; fixed order;
   - replay: run the same job twice through the in-process pipeline, compare `float.hex` of the estimate;
@@ -221,7 +239,7 @@ estimates until the benchmarks replace them with measurements.
 | Lambda compute (400,000 GB-s) | workers: ~2 s total × 1.769 GB ≈ 3.5 GB-s; api: ~11 calls × 0.3 s × 0.5 GB ≈ 1.7 GB-s | ~15,600 GB-s | 4% (still under 20% if 5× slower) |
 | SQS requests (1,000,000) | 1 batch send + up to 10 receives + 10 deletes = 21 | 63,000 + **up to 648,000 idle polling** | up to 71% (largest risk; still free) |
 | DynamoDB (25 RCU / 25 WCU, 25 GB) | Provisioned 15/15 is free regardless of traffic; ~5 KB stored per job | 15 MB | 60% of capacity units; ~0% storage |
-| CloudWatch | 6 custom metrics; 4 new alarms + 1 existing; ~130 MB logs; 1 dashboard | | 60% metrics, 50% alarms, 3% logs |
+| CloudWatch | 6 custom metrics; 4 alarms (the new account has none of its own); ~130 MB logs; 1 dashboard | | 60% metrics, 40% alarms, 3% logs |
 | SNS | a few alarm publishes and emails | < 100 | ~0% |
 | SSM standard parameters, Function URLs, Budget alerts | no charge | | |
 | KMS (20,000 free requests) | decrypt on a function cold start, then cached | < 2,000 | < 10% |
