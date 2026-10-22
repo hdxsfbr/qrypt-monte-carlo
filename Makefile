@@ -1,6 +1,7 @@
 # Local checks. `make check` runs what CI runs.
 PY ?= python3.13
 VENV := .venv
+PY_DIRS := $(wildcard src tests scripts)
 BIN := $(VENV)/bin
 TF_DIR := infra
 
@@ -16,11 +17,11 @@ test: venv
 	$(BIN)/pytest --cov --cov-report=term-missing --cov-fail-under=80
 
 lint: venv
-	$(BIN)/ruff check src tests scripts
-	$(BIN)/ruff format --check src tests scripts
+	$(BIN)/ruff check $(PY_DIRS)
+	$(BIN)/ruff format --check $(PY_DIRS)
 
 fmt: venv
-	$(BIN)/ruff format src tests scripts
+	$(BIN)/ruff format $(PY_DIRS)
 	terraform -chdir=$(TF_DIR) fmt -recursive
 
 tf-fmt:
