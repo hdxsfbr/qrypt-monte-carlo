@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars (git-ignored) and fill in. Never commit terraform.tfvars.
+alert_email = "you@example.com"
+
+# While the account's Lambda concurrency quota is 10 (see docs/DESIGN.md, EC-6 account limit):
+# reserve_concurrency = false
+# worker_concurrency  = 5
