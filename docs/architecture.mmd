@@ -1,0 +1,61 @@
+%% Architecture of the Quantum-Seeded Monte Carlo platform. Rendered to docs/architecture.svg and
+%% docs/architecture.png with mermaid-cli (see README, "Architecture diagram").
+flowchart LR
+  subgraph CLIENT["Caller"]
+    U["Grader, analyst or auditor<br/>curl or scripts/qmc"]
+  end
+
+  subgraph AWS["AWS account, region us-east-1 (every box below is created by Terraform, except the two SSM parameters)"]
+    direction LR
+    subgraph APIM["api module"]
+      FURL["Lambda Function URL<br/>public HTTPS address,<br/>bearer key required"]
+      API["Lambda qmc-dev-api<br/>512 MB, 10 s<br/>routes, validation, rate limit"]
+      APIROLE["IAM role qmc-dev-api<br/>own table, queue send, 2 parameters"]
+      APILOG["Log group /aws/lambda/qmc-dev-api<br/>14-day retention"]
+    end
+    subgraph WM["workers module"]
+      Q[("SQS queue qmc-dev-shards<br/>one message per shard, encrypted")]
+      ESM["Event source mapping<br/>batch size 1, at most 5 at once"]
+      W["Lambda qmc-dev-worker<br/>1769 MB, 60 s<br/>simulate shard, combine results"]
+      DLQ[("SQS dead-letter queue qmc-dev-shards-dlq<br/>after 3 failed attempts")]
+      WROLE["IAM role qmc-dev-worker<br/>own table, own queue"]
+      WLOG["Log group /aws/lambda/qmc-dev-worker<br/>14-day retention"]
+    end
+    subgraph DM["data module"]
+      DDB[("DynamoDB table qmc-dev-jobs<br/>jobs, shard results, rate-limit counters<br/>+ index by creation time; encrypted")]
+    end
+    SSM[["SSM Parameter Store, SecureString<br/>/qmc/dev/qrypt_api_key, /qmc/dev/api_key<br/>created by scripts/put-secrets.sh, not Terraform"]]
+    subgraph OM["observability module"]
+      MET["CloudWatch metrics, namespace QMC<br/>6 custom metrics from the logs"]
+      ALM["4 CloudWatch alarms<br/>api errors, worker errors,<br/>DLQ depth, Qrypt errors"]
+      DASH["CloudWatch dashboard qmc-dev"]
+      SNS["SNS topic qmc-dev-alerts<br/>+ email subscription"]
+    end
+    subgraph BM["budget module"]
+      BUD["AWS Budget qmc-dev-monthly<br/>$1 a month, whole account"]
+    end
+  end
+
+  QR["Qrypt entropy API<br/>quantum random bytes"]
+  MAIL["Alert email inbox"]
+
+  U -->|"HTTPS + Authorization: Bearer key"| FURL --> API
+  API -.->|"uses"| APIROLE
+  API -->|"read both keys"| SSM
+  API -->|"1 KiB, once per new job<br/>(replays reuse the stored seed)"| QR
+  API -->|"job record, rate-limit counter,<br/>status reads"| DDB
+  API -->|"send one message per shard"| Q
+  Q --> ESM -->|"invoke"| W
+  W -.->|"uses"| WROLE
+  Q -->|"3rd failure"| DLQ
+  W -->|"shard result + counter in one transaction;<br/>last shard marks job COMPLETE or PARTIAL"| DDB
+  API -->|"JSON logs + metrics"| APILOG
+  W -->|"JSON logs + metrics"| WLOG
+  APILOG --> MET
+  WLOG --> MET
+  MET --> DASH
+  MET --> ALM
+  DLQ -->|"queue depth"| ALM
+  ALM -->|"ALARM / OK"| SNS --> MAIL
+  BUD -->|"spend alerts"| SNS
+  BUD -->|"spend alerts"| MAIL
