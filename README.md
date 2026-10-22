@@ -16,9 +16,20 @@ number service, splits into parallel pieces (*shards*), and stores everything ne
 | Brief captured (`sources/`) | Done |
 | Research (`docs/research.md`) | Done |
 | Requirements (`docs/PRD.md`, `docs/REQUIREMENTS_TRACE.md`) | Done |
-| Design (`docs/DESIGN.md`) | **Waiting for approval** |
-| Build | Not started |
+| Design (`docs/DESIGN.md`) | Approved |
+| Build | In progress (milestone M0: skeleton and core engine) |
 | Deployed endpoint | Not deployed yet. No AWS resources have been created. |
+
+## AWS account, cost and grading window
+
+- **Account:** a dedicated AWS account on the **Free plan** (`144249522427`, CLI profile `qmc`, region
+  `us-east-1`). On the Free plan, usage beyond the always-free allowances is paid from $100 of credits
+  (valid until 22 April 2027) rather than billed; when credits run out AWS pauses the account instead of
+  charging. A $1/month budget alarm on the whole account still warns early.
+- **Grading window:** the deployed endpoint stays up through **Monday 26 October 2026 (Central Time)**,
+  then `terraform destroy` removes everything.
+- **Expected cost through then: $0.** At most about 5 days deployed; everything stays inside the monthly
+  always-free allowances (worked figures in `docs/DESIGN.md`, section 11), so the credits stay unused.
 
 ## Docs index
 

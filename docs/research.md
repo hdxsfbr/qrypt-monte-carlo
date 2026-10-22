@@ -27,7 +27,28 @@ Terms used below:
   accounts. **[Doc]** https://aws.amazon.com/free/
 - **Always-free** allowances still apply every month on both plans and do not expire. **[Doc]** same page.
 
-### Which plan is this account on? **[Live]**
+### Project account (from 22 October 2026) **[Live]**
+The project now runs in a **new, dedicated AWS account** (`144249522427`, CLI profile `qmc`, region
+`us-east-1`). The older account described further down is no longer used for this project; its notes are
+kept only as history.
+- `aws freetier get-account-plan-state`: plan **FREE**, status **ACTIVE**, **$100.00** of credits left,
+  plan ends **22 April 2027**.
+- **What the Free plan means:** usage beyond the always-free allowances is paid from the credits, not
+  billed. If the credits run out or the plan ends, AWS pauses the account instead of charging a card
+  (unless the account is upgraded to a paid plan). So a mistake costs credits, not money. The brief's $1
+  budget alarm is still required and still useful: it warns before credits are spent.
+- The account is empty: no budgets, SSM parameters, DynamoDB tables, SQS queues, Lambda functions,
+  CloudWatch alarms or SNS topics. So all 10 free alarms and all 25 DynamoDB capacity units are ours, and
+  a **$1 budget can cover the whole account** (no other spending to filter out).
+- **Lambda concurrency limit is 10** (the "Concurrent executions" quota; the AWS default for established
+  accounts is 1,000). Concurrency is the number of copies of functions that can run at the same moment
+  across the whole account. AWS keeps 100 units unreserved, so with a limit of 10 **no function can be
+  given reserved concurrency** (a guaranteed and capped number of copies). **[Doc]**
+  https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html . The quota is adjustable:
+  a Service Quotas increase request to 1,000 is free. See DESIGN section 6 for how the design copes either
+  way.
+
+### Old account (no longer used for this project) **[Live]**
 - Account `788792938287`, IAM user `hdx`, default region `us-east-1`.
 - It has Lambda functions last modified in **2016**, so it predates the change. It is a **legacy paid
   account**, not on the new credit-based Free plan. The Free plan status call
@@ -52,7 +73,7 @@ Terms used below:
 | AWS Budgets | Budget monitoring and alerts are free; first 2 *action-enabled* budgets are free | Budgets are checked about once a day, so alerts can lag by up to 24 hours | **[Doc]** https://aws.amazon.com/aws-cost-management/aws-budgets/pricing/ |
 | Lambda Function URLs | No separate charge; you pay only for the Lambda invocation | | **[Doc]** Lambda pricing |
 
-### What already uses the account **[Live]** (read-only checks)
+### What already used the old account **[Live]** (read-only checks)
 - **Spend this month (1 to 22 October): $1.01, all of it Amazon Route 53** (domain name hosting, about
   $0.50 per hosted zone per month). Everything else was within free allowances.
 - **CloudWatch alarms:** 1 existing alarm (`BillingAlarm`, threshold $100, notifying SNS topic `NotifyMe`).
@@ -66,10 +87,9 @@ Terms used below:
 - Cost Explorer checks themselves cost $0.01 each; we made three (about $0.03 total).
 
 ### Free-tier risks found
-1. **A $1/month account-wide budget would alert every month**, because Route 53 already costs about $1.01.
-   Fix: filter the budget to the services this project uses (Lambda, DynamoDB, SQS, SNS, CloudWatch, SSM,
-   KMS). A tag-based filter is cleaner but needs a cost-allocation tag activated in the billing console
-   first and takes up to 24 hours to show data.
+1. *(Old account only, no longer applies.)* A $1/month account-wide budget would have alerted every month
+   there, because Route 53 already cost about $1.01. The new account has no other spending, so the budget
+   covers the whole account.
 2. **Idle SQS polling.** When a Lambda function reads from SQS, AWS polls the queue all the time, even when
    it is empty: 2 to 5 pollers, each making about 3 long-poll calls a minute. Idle cost:
    5 × 3 × 60 × 24 × 30 = **648,000 requests a month**, about two-thirds of the 1M free SQS requests,

@@ -15,6 +15,13 @@
 - Tests use the mock Qrypt client and need no token. Live Qrypt calls are limited: one 1 KiB call per job,
   and the whole assessment must stay under 10 MB of entropy.
 
+## AWS account
+- All project AWS work uses the dedicated Free plan account `144249522427` through the CLI profile `qmc`
+  (`export AWS_PROFILE=qmc`, region `us-east-1`). Never use the default profile: it points at an older,
+  unrelated account.
+- The `qmc` login is a browser session that expires after some hours. If a command fails with expired
+  credentials, stop and ask the owner to run `aws login --remote --profile qmc`.
+
 ## Cost
 - Stay inside AWS always-free allowances. Do not create NAT gateways, load balancers, EC2, RDS, API Gateway,
   Secrets Manager, or Step Functions without approval.

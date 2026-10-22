@@ -137,7 +137,7 @@ Black-Scholes formula.
 ### Prerequisites (B:10-13)
 | ID | Requirement |
 |----|-------------|
-| PRE-1 | Before the timebox: an AWS account with billing alerts, a working Qrypt token, Terraform and the AWS CLI installed and signed in. Status: all in place (see `docs/research.md`, section 8) |
+| PRE-1 | Before the timebox: an AWS account with billing alerts, a working Qrypt token, Terraform and the AWS CLI installed and signed in. Status: all in place. The project uses a dedicated AWS account on the Free plan (see `docs/research.md`, sections 1 and 8) |
 
 ## 7. Deliverables (B:259-280)
 | ID | Deliverable |
@@ -148,7 +148,7 @@ Black-Scholes formula.
 | D-4 | Architecture diagram (Mermaid) showing every AWS resource and data flow |
 | D-5 | Grader quick-start in the README: AWS credentials, store the SSM parameter, `terraform apply`, submit a job, replay it, `terraform destroy` |
 | D-6 | Cost note: free-tier arithmetic and a screenshot of the Budget configuration |
-| D-7 | Deployed endpoint URL, kept up through grading, then destroyed |
+| D-7 | Deployed endpoint URL, kept up through Monday 26 October 2026 (Central Time), then destroyed |
 | D-8 | One-line project description (≤ 120 characters) |
 | D-9 | Demo video (≤ 5 minutes) showing `terraform apply`, a job running to completion, the Black-Scholes comparison, a bit-identical replay, and the DLQ alarm firing |
 | D-10 | Benchmark report with the measured numbers (from NFR-1 to NFR-4) |
@@ -174,14 +174,17 @@ correctness tests 5, docs/AI disclosure/demo 10. Pass at 70 of 100.
 | M4 Demo | Video script and recording, final submission | End of day 2 |
 
 ## 10. Open questions
-1. **Budget alert email:** which address should receive budget and alarm emails? (It has to be confirmed by
-   clicking a link AWS sends.)
+1. **Alert email:** Andre's Gauntlet email (exact address to come), set through the required Terraform
+   variable `alert_email`. It has to be confirmed by clicking a link AWS sends.
 2. **Region:** `us-east-1` (already the default, closest to Qrypt's US East endpoint). OK?
 3. **API authentication:** bearer key checked against SSM (graders can call our URL with plain `curl`), with
    `AWS_IAM` as a Terraform switch for graders who deploy in their own account. OK?
-4. **Budget scope:** filter the $1 budget to this project's services, since Route 53 already costs about
-   $1/month in this account. OK?
-5. **Due date:** when is the submission due, and how long must the endpoint stay up for grading?
+4. **Budget scope:** *settled*: the project uses a new, dedicated Free plan account, so the $1 budget covers
+   the whole account.
+5. **Grading window:** *settled*: the deployed endpoint stays up through Monday 26 October 2026 (Central
+   Time), then is destroyed.
 6. **GitHub:** the brief asks for a GitHub repository; do you want a GitHub mirror, or is GitLab enough?
 7. **Stretch goals:** OK with the ones proposed in the design (dashboard, Checkov in CI, per-job cost,
    `PENDING_ENTROPY` if time allows)?
+8. **Lambda concurrency quota:** the new account allows only 10 functions running at once, which blocks
+   reserved concurrency (EC-6). Request the free increase to 1,000?

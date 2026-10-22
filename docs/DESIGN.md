@@ -16,7 +16,8 @@ CQ-, D-) refer to `docs/PRD.md`. Terms are defined in the PRD glossary and in `d
 | Completion | Each worker writes its shard result and bumps the job's counter in one DynamoDB transaction; the worker that finishes the last shard combines the results | Idempotent under duplicate delivery; no extra orchestrator (Step Functions would not stay free at the reference load) |
 | Database | One DynamoDB table (provisioned 10 read / 10 write units) plus one index (5/5) | 15 of the 25 free units; on-demand is not free |
 | Metrics | CloudWatch Embedded Metric Format (metrics written as structured log lines), one fixed dimension | No metric API calls; 6 custom metrics out of 10 free |
-| Budget | $1/month, filtered to this project's services, alert to SNS and email | Route 53 already costs about $1/month in this account, so an account-wide $1 budget would alert every month |
+| AWS account | Dedicated account `144249522427` on the AWS Free plan, CLI profile `qmc` | Nothing else runs there; usage beyond the always-free allowances comes out of $100 of credits instead of being billed |
+| Budget | $1/month for the whole account, alerts to SNS and to the `alert_email` address | Required by the brief; on the Free plan it warns before any credits are spent |
 | Secrets | Qrypt token and API key created in SSM out-of-band with a helper script; Terraform only knows their *names* | Values never enter Terraform state or the repo |
 
 ## 2. Architecture
@@ -38,7 +39,7 @@ flowchart LR
     CWA[CloudWatch alarms<br/>worker errors, DLQ depth,<br/>api errors, Qrypt errors]
     DASH[CloudWatch dashboard]
     SNS[SNS topic qmc-alerts]
-    BUD[AWS Budget $1/month<br/>project services only]
+    BUD[AWS Budget $1/month<br/>whole account]
   end
   Q[Qrypt entropy API<br/>api-eus.qrypt.com]
   MAIL[Alert email]
@@ -87,10 +88,10 @@ src/handlers/        api.py, worker.py (thin: parse, call qmc, talk to AWS)
 scripts/             put-secrets.sh, qmc.py (small CLI), bench_submit.py, bench_job.py, force_failure.sh, rebuild_timer.sh
 tests/               pytest unit tests + handler tests against moto (a library that fakes AWS locally)
 ```
-Main variables: `environment`, `alert_email`, `api_auth_type` (`BEARER` or `AWS_IAM`),
+Main variables: `environment`, `alert_email` (required, no default: the address that receives budget and alarm emails), `api_auth_type` (`BEARER` or `AWS_IAM`),
 `qrypt_param_name`, `api_key_param_name`, `max_paths` (10,000,000), `max_shards` (20),
-`max_paths_per_shard` (500,000), `worker_reserved_concurrency` (20), `api_reserved_concurrency` (5),
-`worker_timeout_s` (60), `max_receive_count` (3), `log_retention_days` (14), `budget_limit_usd` (1),
+`max_paths_per_shard` (500,000), `api_concurrency` (5),
+`worker_concurrency` (20), `reserve_concurrency` (true), `worker_timeout_s` (60), `max_receive_count` (3), `log_retention_days` (14), `budget_limit_usd` (1),
 `enable_fault_injection` (false). Lambda code is zipped by Terraform's `archive_file`, which gives the same
 hash for the same files, so an unchanged repo shows no drift. Local state, git-ignored.
 
@@ -133,7 +134,8 @@ path (only v1 exists for now).
 | EC-3 Worker failure | On an exception the worker shortens the message's hidden time (2 s, then 4 s backoff) so retries are quick, then re-raises. On the last attempt (`ApproximateReceiveCount` = 3) it first records the shard as FAILED and bumps `failed`. SQS moves the message to the DLQ; the DLQ alarm fires. When `completed + failed = shards` and `failed > 0` the job becomes `PARTIAL` with `failed_shards`; it is never `COMPLETE`. If a worker dies without recording (crash, timeout), `GET /jobs/{id}` marks a job older than 10 minutes with missing shards as `PARTIAL` and lists them. |
 | EC-4 Timeout | `paths/shards` capped at 500,000 paths per shard (about 1 s on Lambda) against a 60-second timeout; larger ratios rejected with 400. |
 | EC-5 Qrypt burst | A DynamoDB counter per 10-second window allows at most 25 Qrypt calls per window (margin under 30); above it, 429 with `Retry-After`. The api function's reserved concurrency (5) also caps parallel calls. |
-| EC-6 Cost runaway | `max_paths` 10,000,000 and `max_shards` 20 per job; worker reserved concurrency 20; api reserved concurrency 5. Over-limit requests rejected with 400. |
+| EC-6 Cost runaway | `max_paths` 10,000,000 and `max_shards` 20 per job; worker reserved concurrency 20; api reserved concurrency 5. The queue trigger's *maximum concurrency* (how many worker copies the queue may start at once) is set to the same 20, so the queue never starts more workers than are allowed and throttling cannot push healthy shards toward the DLQ. Over-limit requests rejected with 400. |
+| EC-6 account limit | The new account's Lambda concurrency limit is **10**, and AWS only allows reserved concurrency when at least 100 units stay unreserved, so reservations fail until the quota is raised to 1,000 (a free Service Quotas request). Terraform therefore has a documented switch `reserve_concurrency` (default `true`). If the quota is still 10 at deploy time, set it to `false` and set `worker_concurrency = 5`: the queue trigger's maximum concurrency then caps workers at 5, the account limit caps everything at 10, and the api keeps at least 5 copies free. The README states which setting the deployed stack uses. |
 | EC-7 Invalid input | Strict validation: all seven fields required, numeric (booleans and strings rejected), finite; `S0`, `K`, `sigma`, `T` > 0; `paths`, `shards` whole numbers ≥ 1; `shards ≤ paths`; limits above; unknown fields rejected; body ≤ 4 KB. 400 with a message naming the field. |
 | EC-8 Teardown, drift | Log groups are created by Terraform (so destroy removes them); deletion protection off; deterministic zips; both Function URL permissions in Terraform. Checked with `terraform plan -detailed-exitcode` after apply and an AWS resource-tag search after destroy. |
 | EC-9 First run | `GET /jobs` queries the index and returns `[]`; unknown id → 404 `{"error": "job not found", "job_id": ...}`. |
@@ -224,10 +226,17 @@ estimates until the benchmarks replace them with measurements.
 | SSM standard parameters, Function URLs, Budget alerts | no charge | | |
 | KMS (20,000 free requests) | decrypt on a function cold start, then cached | < 2,000 | < 10% |
 
-Result: **$0** at the reference load. Qrypt at that load would use 3,000 KiB a month, so we will not run it
+Result: **$0** at the reference load, so the $100 Free plan credits are not touched. Qrypt at that load would use 3,000 KiB a month, so we will not run it
 for real; actual project entropy use is about 150 KiB in total (tests, benchmarks, demo), against the
 10,240 KiB budget. Idle cost with nothing running is $0 apart from the free SQS polling. After grading,
 `terraform destroy` removes everything.
+
+**Cost through the grading window.** The endpoint must stay up until the end of **Monday 26 October 2026
+(Central Time)**, then it is torn down. That is at most about 5 days deployed. Idle queue polling over 5
+days is at most 5 × 3 × 60 × 24 × 5 = 108,000 SQS requests; tests, benchmarks and the demo add a few
+hundred jobs at most. Every figure stays far inside the monthly always-free allowances, so the expected
+cost is **$0** and the $100 of credits stay unused. The $1 budget alarm would warn if that estimate were
+wrong.
 
 ## 12. Stretch goals
 | Stretch | Plan | Reason |
@@ -251,7 +260,7 @@ like a product in the demo and the grader quick-start.
 | First 32 bytes of the Qrypt block as the master seed | Hash of the whole block | Simplest to explain and audit: the stored seed is literally Qrypt's bytes. The block's fingerprint is kept for provenance |
 | Worker that finishes last does the combining | Step Functions, or a separate aggregator | No extra service or cost; the transaction counter makes it safe; the combining is deterministic so a rare double run writes the same result |
 | Batch size 1 on the queue | Batches of 10 | One shard = one invocation keeps retries and DLQ handling per shard and simple. Requests stay well within free |
-| Reserved concurrency 20 = max shards | Lower concurrency | A job never gets throttled, so throttling cannot push healthy shards toward the DLQ |
+| Worker concurrency 20 = max shards, enforced by reserved concurrency and the queue trigger's maximum | Lower concurrency | A job never gets throttled, so throttling cannot push healthy shards toward the DLQ. The trigger maximum disables AWS's idle scale-down to 2 pollers; the idle-polling figure in section 11 already assumes 5 pollers |
 | Short retry backoff set by the worker | Long default hidden time (6× timeout) | Keeps the 6× safety while running, but lets failures retry in seconds, so the DLQ demo takes minutes, not half an hour |
 | Bearer key by default | `AWS_IAM` only | Graders can test our deployed URL with `curl`; IAM remains a switch |
 | Single table | Separate tables | Fewer resources, one capacity budget (15 of 25 units), one transaction scope |
@@ -262,11 +271,13 @@ like a product in the demo and the grader quick-start.
 | Local Terraform state | Remote state in S3 | Allowed by the brief; S3 is not always-free; one operator |
 
 ## 14. Open questions for approval
-1. Alert email address for budget and alarm emails (AWS sends a confirmation link that must be clicked).
+1. Alert email address: Andre's Gauntlet email (exact address to come), passed as the required
+   Terraform variable `alert_email`. AWS sends a confirmation link that must be clicked.
 2. Region `us-east-1`: OK?
 3. Bearer key by default with `AWS_IAM` as a switch: OK? The deployed URL's key would be shared with
    graders in the submission notes, not in the repo.
-4. Budget filtered to this project's services (because of the existing Route 53 cost): OK?
-5. Due date, and how long the endpoint must stay up for grading.
+4. *(Settled.)* The project uses the new Free plan account, so the budget covers the whole account.
+5. *(Settled.)* The endpoint stays up through Monday 26 October 2026 (Central Time), then is destroyed.
 6. GitLab only, or also a GitHub mirror (the brief says GitHub)?
 7. Stretch picks above, and the `qmc` CLI: OK?
+8. Lambda concurrency quota: request an increase from 10 to 1,000 (free) so reserved concurrency works?
