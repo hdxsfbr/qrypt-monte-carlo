@@ -196,5 +196,6 @@ After `terraform destroy`, delete the two secrets with
 
 To repeat the forced-failure check, apply with `-var enable_fault_injection=true`, then
 `scripts/qmc submit --paths 100000 --shards 4 --fail-shards 2 --wait`; the job ends PARTIAL and the message
-reaches the dead-letter queue, which sets off the `qmc-dev-dlq-depth` alarm within about 5 minutes. Apply
-again without the variable to switch it off.
+reaches the dead-letter queue, which sets off the `qmc-dev-dlq-depth` alarm. On 22 October that took about
+9 minutes after the job ended (SQS reports queue depth to CloudWatch with a delay). Apply again without the
+variable to switch it off.
