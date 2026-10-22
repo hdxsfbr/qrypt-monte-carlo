@@ -57,3 +57,16 @@ def test_shard_paths_add_up():
 def test_unknown_algorithm_version_is_refused():
     with pytest.raises(ValueError):
         pipeline.run_job(PARAMS, MASTER, version="qmc-v0")
+
+
+def test_golden_values():
+    # Fixed seed, fixed inputs, exact bits. Any change to the numbers (seed derivation, generator,
+    # Box-Muller step, summation order) breaks this test on purpose; such a change also needs a new
+    # algo_version. These bits matched on two Linux x86-64 machines (Python 3.13.2 and 3.13.5). The
+    # maths library may differ in the last bit on other platforms; see docs/DESIGN.md section 5.
+    master = bytes.fromhex("5a" * 32)
+    small = pipeline.run_job(JobParams(100.0, 100.0, 0.05, 0.2, 1.0, 10_000, 4), master)
+    assert small.estimate.estimate_hex == "0x1.4712dd8387372p+3"
+    assert small.shards[0].n == 2500
+    brief = pipeline.run_job(JobParams(100.0, 100.0, 0.05, 0.2, 1.0, 1_000_000, 10), master)
+    assert brief.estimate.estimate_hex == "0x1.4e815e344c482p+3"  # 10.453291990417942

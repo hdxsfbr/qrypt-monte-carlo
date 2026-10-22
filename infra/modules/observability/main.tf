@@ -1,6 +1,8 @@
 # Alerts and the dashboard (docs/DESIGN.md sections 2 and 12).
-# Custom metrics are written by the functions as Embedded Metric Format log lines in namespace
-# var.metrics_namespace with one dimension, Environment.
+# Custom metrics are written by the functions as Embedded Metric Format log lines (structured log
+# lines CloudWatch turns into metrics) in namespace var.metrics_namespace with one dimension,
+# Environment. The six names: JobsSubmitted, PathsSimulated, EntropyKiB, ShardFailures, QryptErrors,
+# ShardDurationMs.
 
 resource "aws_sns_topic" "alerts" {
   #checkov:skip=CKV_AWS_26:CloudWatch alarms and AWS Budgets cannot publish to a topic encrypted with the default aws/sns key, and a customer key costs $1/month. Alert messages hold no secrets.
@@ -68,29 +70,37 @@ resource "aws_cloudwatch_dashboard" "main" {
       {
         type = "metric", x = 0, y = 0, width = 12, height = 6
         properties = {
-          title   = "Jobs"
+          title   = "Jobs submitted and shard failures"
           region  = var.region
           stat    = "Sum"
           period  = 300
-          metrics = [for m in ["JobsSubmitted", "JobsCompleted", "JobsPartial"] : [var.metrics_namespace, m, "Environment", var.environment]]
+          metrics = [for m in ["JobsSubmitted", "ShardFailures"] : [var.metrics_namespace, m, "Environment", var.environment]]
         }
       },
       {
         type = "metric", x = 12, y = 0, width = 12, height = 6
         properties = {
-          title  = "Qrypt"
-          region = var.region
-          period = 300
-          metrics = [
-            [var.metrics_namespace, "QryptErrors", "Environment", var.environment, { stat = "Sum" }],
-            [var.metrics_namespace, "QryptLatencyMs", "Environment", var.environment, { stat = "p95" }],
-          ]
+          title   = "Paths simulated"
+          region  = var.region
+          stat    = "Sum"
+          period  = 300
+          metrics = [[var.metrics_namespace, "PathsSimulated", "Environment", var.environment]]
         }
       },
       {
         type = "metric", x = 0, y = 6, width = 12, height = 6
         properties = {
-          title  = "Function duration (p95, ms)"
+          title   = "Qrypt entropy used (KiB) and Qrypt errors"
+          region  = var.region
+          stat    = "Sum"
+          period  = 300
+          metrics = [for m in ["EntropyKiB", "QryptErrors"] : [var.metrics_namespace, m, "Environment", var.environment]]
+        }
+      },
+      {
+        type = "metric", x = 12, y = 6, width = 12, height = 6
+        properties = {
+          title  = "Duration (p95, milliseconds)"
           region = var.region
           stat   = "p95"
           period = 300
@@ -102,9 +112,9 @@ resource "aws_cloudwatch_dashboard" "main" {
         }
       },
       {
-        type = "metric", x = 12, y = 6, width = 12, height = 6
+        type = "metric", x = 0, y = 12, width = 24, height = 6
         properties = {
-          title  = "Errors, throttles and dead-letter queue"
+          title  = "Errors, throttles and dead-letter queue depth"
           region = var.region
           period = 60
           metrics = [
