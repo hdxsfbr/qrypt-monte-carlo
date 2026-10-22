@@ -1,0 +1,36 @@
+{
+  "algo_version": "qmc-v1",
+  "black_scholes": 10.450583572185565,
+  "created_at": "2026-10-22T21:46:17.826Z",
+  "fail_shards": [
+    2
+  ],
+  "failed_shards": [
+    2
+  ],
+  "finished_at": "2026-10-22T21:46:25.070Z",
+  "job_id": "a11d9d36-db79-41ce-8d71-473a2e469f82",
+  "master_seed_hex": "78297277abc64d79a3315a9ab65ad8bd074108c8b6062cb2e879f6195d53ce1c",
+  "params": {
+    "K": 100.0,
+    "S0": 100.0,
+    "T": 1.0,
+    "paths": 100000,
+    "r": 0.05,
+    "shards": 4,
+    "sigma": 0.2
+  },
+  "progress": {
+    "completed": 3,
+    "failed": 1,
+    "shards": 4
+  },
+  "runtime": "python3.13",
+  "seed_source": {
+    "block_sha256": "417ac23bb5ece4db5256282439da2a7c8b5d3a5ad071e003d785ec3182efdad2",
+    "fetched_at": "2026-10-22T21:46:17.664Z",
+    "kib": 1,
+    "provider": "qrypt"
+  },
+  "status": "PARTIAL"
+}

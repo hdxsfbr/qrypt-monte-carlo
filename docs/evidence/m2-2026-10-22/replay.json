@@ -1,0 +1,42 @@
+{
+  "algo_version": "qmc-v1",
+  "black_scholes": 10.450583572185565,
+  "created_at": "2026-10-22T21:46:06.100Z",
+  "finished_at": "2026-10-22T21:46:08.846Z",
+  "job_id": "da4d92fd-cecb-4b5b-944b-9d6861472483",
+  "master_seed_hex": "dda85bba2310afbc37b1c726ce40aabe68773a9db094e070cfe45e6a6bedf700",
+  "params": {
+    "K": 100.0,
+    "S0": 100.0,
+    "T": 1.0,
+    "paths": 1000000,
+    "r": 0.05,
+    "shards": 10,
+    "sigma": 0.2
+  },
+  "progress": {
+    "completed": 10,
+    "failed": 0,
+    "shards": 10
+  },
+  "replay_check": {
+    "bit_identical": true,
+    "original_estimate_hex": "0x1.4e756e51806fep+3",
+    "original_job_id": "d7994ece-c8b9-4bfc-9812-d4151699a2ed"
+  },
+  "replay_of": "d7994ece-c8b9-4bfc-9812-d4151699a2ed",
+  "result": {
+    "ci95_high": 10.480680144060647,
+    "ci95_low": 10.422989516856676,
+    "estimate": 10.451834830458662,
+    "estimate_hex": "0x1.4e756e51806fep+3",
+    "n": 1000000,
+    "std_error": 0.014716996735706811,
+    "std_errors_from_black_scholes": 0.085
+  },
+  "runtime": "python3.13",
+  "seed_source": {
+    "replay_of": "d7994ece-c8b9-4bfc-9812-d4151699a2ed"
+  },
+  "status": "COMPLETE"
+}

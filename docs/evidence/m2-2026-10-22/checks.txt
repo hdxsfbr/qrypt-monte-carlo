@@ -1,0 +1,153 @@
+# Read-only checks, run 2026-10-22 17:00 CDT. Secrets are never printed.
+
+$ aws sts get-caller-identity --query Account --output text
+144249522427
+
+$ scripts/put-secrets.sh --dry-run
+dry run: would write /qmc/dev/qrypt_api_key (SecureString, 40 characters) in us-east-1
+dry run: would write /qmc/dev/api_key (SecureString, 43 characters) in us-east-1
+
+$ aws ssm describe-parameters --parameter-filters Key=Name,Option=BeginsWith,Values=/qmc/dev/ --query Parameters[].[Name,Type,Version] --output text
+/qmc/dev/api_key	SecureString	1
+/qmc/dev/qrypt_api_key	SecureString	1
+
+$ scripts/qmc health
+{
+  "checks": {
+    "dynamodb": "ok",
+    "ssm": "ok"
+  },
+  "status": "ok"
+}
+
+$ curl -s -o /dev/null -w '%{http_code}' $QMC_URL/jobs   # no API key
+401
+$ curl ... -H 'Authorization: Bearer wrong' $QMC_URL/jobs
+401
+
+$ scripts/qmc submit --paths 1000 --shards 1 --fail-shards 0
+qmc: HTTP 400: fail_shards: fault injection is not enabled on this deployment
+
+$ scripts/qmc list --limit 10
+{
+  "jobs": [
+    {
+      "created_at": "2026-10-22T21:46:17.826Z",
+      "estimate": null,
+      "job_id": "a11d9d36-db79-41ce-8d71-473a2e469f82",
+      "paths": 100000,
+      "replay_of": null,
+      "shards": 4,
+      "status": "PARTIAL"
+    },
+    {
+      "created_at": "2026-10-22T21:46:06.100Z",
+      "estimate": 10.451834830458662,
+      "job_id": "da4d92fd-cecb-4b5b-944b-9d6861472483",
+      "paths": 1000000,
+      "replay_of": "d7994ece-c8b9-4bfc-9812-d4151699a2ed",
+      "shards": 10,
+      "status": "COMPLETE"
+    },
+    {
+      "created_at": "2026-10-22T21:45:57.864Z",
+      "estimate": 10.451834830458662,
+      "job_id": "d7994ece-c8b9-4bfc-9812-d4151699a2ed",
+      "paths": 1000000,
+      "replay_of": null,
+      "shards": 10,
+      "status": "COMPLETE"
+    }
+  ],
+  "next": null
+}
+
+$ aws cloudwatch describe-alarm-history --alarm-name qmc-dev-dlq-depth --history-item-type StateUpdate --query AlarmHistoryItems[].[Timestamp,HistorySummary] --output text
+2026-10-22T14:58:24.678000-07:00	Alarm updated from ALARM to OK
+2026-10-22T14:55:24.678000-07:00	Alarm updated from OK to ALARM
+2026-10-22T14:45:24.680000-07:00	Alarm updated from INSUFFICIENT_DATA to OK
+
+$ aws cloudwatch describe-alarms --alarm-name-prefix qmc-dev --query MetricAlarms[].[AlarmName,StateValue] --output text
+qmc-dev-api-errors	OK
+qmc-dev-dlq-depth	OK
+qmc-dev-qrypt-errors	OK
+qmc-dev-worker-errors	OK
+
+$ aws cloudwatch list-metrics --namespace QMC --query Metrics[].[MetricName,Dimensions[0].Name,Dimensions[0].Value] --output text
+PathsSimulated	Environment	dev
+ShardDurationMs	Environment	dev
+ShardFailures	Environment	dev
+EntropyKiB	Environment	dev
+JobsSubmitted	Environment	dev
+
+$ aws cloudwatch get-metric-statistics --namespace QMC --metric-name JobsSubmitted --dimensions Name=Environment,Value=dev --start-time 2026-10-22T21:30:00Z --end-time 2026-10-22T22:00:20Z --period 3600 --statistics Sum --query Datapoints[].Sum --output text
+3.0
+
+$ aws cloudwatch get-metric-statistics --namespace QMC --metric-name PathsSimulated --dimensions Name=Environment,Value=dev --start-time 2026-10-22T21:30:00Z --end-time 2026-10-22T22:00:21Z --period 3600 --statistics Sum --query Datapoints[].Sum --output text
+2075000.0
+
+$ aws cloudwatch get-metric-statistics --namespace QMC --metric-name EntropyKiB --dimensions Name=Environment,Value=dev --start-time 2026-10-22T21:30:00Z --end-time 2026-10-22T22:00:22Z --period 3600 --statistics Sum --query Datapoints[].Sum --output text
+2.0
+
+$ aws cloudwatch get-metric-statistics --namespace QMC --metric-name ShardFailures --dimensions Name=Environment,Value=dev --start-time 2026-10-22T21:30:00Z --end-time 2026-10-22T22:00:23Z --period 3600 --statistics Sum --query Datapoints[].Sum --output text
+1.0
+
+$ aws budgets describe-budgets --account-id 144249522427 --query Budgets[].[BudgetName,BudgetType,TimeUnit,BudgetLimit.Amount,BudgetLimit.Unit] --output text
+qmc-dev-monthly	COST	MONTHLY	1.0	USD
+
+$ aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:144249522427:qmc-dev-alerts --query Subscriptions[].[Protocol,SubscriptionArn] --output text
+email	PendingConfirmation
+
+$ aws service-quotas get-requested-service-quota-change --request-id 506b0212b9f742e1a8fc7e8d040cb036aWQ1epwL --query RequestedQuota.[QuotaCode,DesiredValue,Status,CaseId] --output text
+L-B99A9384	1000.0	CASE_OPENED	179270556400278
+
+$ aws lambda get-account-settings --query AccountLimit.ConcurrentExecutions
+10
+
+$ terraform -chdir=infra plan -input=false -no-color -detailed-exitcode -compact-warnings
+data.archive_file.lambda: Reading...
+data.archive_file.lambda: Read complete after 0s [id=df1698ce5b2f14d72960cf0a4217a76631df6c42]
+data.aws_caller_identity.current: Reading...
+module.workers.data.aws_iam_policy_document.assume: Reading...
+module.workers.aws_cloudwatch_log_group.worker: Refreshing state... [id=/aws/lambda/qmc-dev-worker]
+module.budget.data.aws_caller_identity.current: Reading...
+module.api.data.aws_iam_policy_document.assume: Reading...
+module.workers.aws_sqs_queue.dlq: Refreshing state... [id=https://sqs.us-east-1.amazonaws.com/144249522427/qmc-dev-shards-dlq]
+module.api.aws_cloudwatch_log_group.api: Refreshing state... [id=/aws/lambda/qmc-dev-api]
+module.observability.aws_sns_topic.alerts: Refreshing state... [id=arn:aws:sns:us-east-1:144249522427:qmc-dev-alerts]
+module.workers.data.aws_iam_policy_document.assume: Read complete after 0s [id=2690255455]
+module.api.data.aws_iam_policy_document.assume: Read complete after 0s [id=2690255455]
+module.data.aws_dynamodb_table.jobs: Refreshing state... [id=qmc-dev-jobs]
+module.workers.aws_iam_role.worker: Refreshing state... [id=qmc-dev-worker]
+module.api.aws_iam_role.api: Refreshing state... [id=qmc-dev-api]
+data.aws_caller_identity.current: Read complete after 0s [id=144249522427]
+module.budget.data.aws_caller_identity.current: Read complete after 0s [id=144249522427]
+module.workers.aws_sqs_queue.shards: Refreshing state... [id=https://sqs.us-east-1.amazonaws.com/144249522427/qmc-dev-shards]
+module.observability.aws_sns_topic_subscription.email: Refreshing state... [id=arn:aws:sns:us-east-1:144249522427:qmc-dev-alerts:69a27158-f61b-4199-9532-60eb853caead]
+module.budget.data.aws_iam_policy_document.topic: Reading...
+module.budget.data.aws_iam_policy_document.topic: Read complete after 0s [id=3951898485]
+module.budget.aws_sns_topic_policy.alerts: Refreshing state... [id=arn:aws:sns:us-east-1:144249522427:qmc-dev-alerts]
+module.workers.aws_sqs_queue_redrive_allow_policy.dlq: Refreshing state... [id=https://sqs.us-east-1.amazonaws.com/144249522427/qmc-dev-shards-dlq]
+module.workers.data.aws_iam_policy_document.worker: Reading...
+module.api.data.aws_iam_policy_document.api: Reading...
+module.workers.data.aws_iam_policy_document.worker: Read complete after 0s [id=1096816511]
+module.api.data.aws_iam_policy_document.api: Read complete after 0s [id=1978907399]
+module.budget.aws_budgets_budget.account: Refreshing state... [id=144249522427:qmc-dev-monthly]
+module.api.aws_iam_role_policy.api: Refreshing state... [id=qmc-dev-api:api]
+module.workers.aws_iam_role_policy.worker: Refreshing state... [id=qmc-dev-worker:worker]
+module.api.aws_lambda_function.api: Refreshing state... [id=qmc-dev-api]
+module.workers.aws_lambda_function.worker: Refreshing state... [id=qmc-dev-worker]
+module.workers.aws_lambda_event_source_mapping.shards: Refreshing state... [id=2137cdc7-9467-4324-a31d-6601be8bd796]
+module.api.aws_lambda_function_url.api: Refreshing state... [id=qmc-dev-api]
+module.api.aws_lambda_permission.url_invoke_url[0]: Refreshing state... [id=FunctionUrlPublicInvokeUrl]
+module.api.aws_lambda_permission.url_invoke_function[0]: Refreshing state... [id=FunctionUrlPublicInvokeFunction]
+module.observability.aws_cloudwatch_dashboard.main: Refreshing state... [id=qmc-dev]
+module.observability.aws_cloudwatch_metric_alarm.this["qrypt-errors"]: Refreshing state... [id=qmc-dev-qrypt-errors]
+module.observability.aws_cloudwatch_metric_alarm.this["worker-errors"]: Refreshing state... [id=qmc-dev-worker-errors]
+module.observability.aws_cloudwatch_metric_alarm.this["dlq-depth"]: Refreshing state... [id=qmc-dev-dlq-depth]
+module.observability.aws_cloudwatch_metric_alarm.this["api-errors"]: Refreshing state... [id=qmc-dev-api-errors]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.

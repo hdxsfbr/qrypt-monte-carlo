@@ -1,0 +1,27 @@
+# module.api.aws_cloudwatch_log_group.api will be created
+# module.api.aws_iam_role.api will be created
+# module.api.aws_iam_role_policy.api will be created
+# module.api.aws_lambda_function.api will be created
+# module.api.aws_lambda_function_url.api will be created
+# module.api.aws_lambda_permission.url_invoke_function[0] will be created
+# module.api.aws_lambda_permission.url_invoke_url[0] will be created
+# module.budget.aws_budgets_budget.account will be created
+# module.budget.aws_sns_topic_policy.alerts will be created
+# module.data.aws_dynamodb_table.jobs will be created
+# module.observability.aws_cloudwatch_dashboard.main will be created
+# module.observability.aws_cloudwatch_metric_alarm.this["api-errors"] will be created
+# module.observability.aws_cloudwatch_metric_alarm.this["dlq-depth"] will be created
+# module.observability.aws_cloudwatch_metric_alarm.this["qrypt-errors"] will be created
+# module.observability.aws_cloudwatch_metric_alarm.this["worker-errors"] will be created
+# module.observability.aws_sns_topic.alerts will be created
+# module.observability.aws_sns_topic_subscription.email will be created
+# module.workers.aws_cloudwatch_log_group.worker will be created
+# module.workers.aws_iam_role.worker will be created
+# module.workers.aws_iam_role_policy.worker will be created
+# module.workers.aws_lambda_event_source_mapping.shards will be created
+# module.workers.aws_lambda_function.worker will be created
+# module.workers.aws_sqs_queue.dlq will be created
+# module.workers.aws_sqs_queue.shards will be created
+# module.workers.aws_sqs_queue_redrive_allow_policy.dlq will be created
+Plan: 25 to add, 0 to change, 0 to destroy.
+Apply complete! Resources: 25 added, 0 changed, 0 destroyed.

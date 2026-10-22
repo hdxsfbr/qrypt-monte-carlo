@@ -1,0 +1,12 @@
+{
+  "Body": {
+    "job_id": "a11d9d36-db79-41ce-8d71-473a2e469f82",
+    "shard_index": 2,
+    "shard_count": 4,
+    "paths": 25000
+  },
+  "Attributes": {
+    "ApproximateReceiveCount": "4"
+  },
+  "note": "receipt handle and message id removed"
+}
