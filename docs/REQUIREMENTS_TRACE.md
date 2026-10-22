@@ -1,7 +1,7 @@
 # Requirements trace
 
 Every requirement with the line in the brief it comes from (`B:<line>` refers to
-`sources/cloud_quantum_seeded_monte_carlo.md`). Status and evidence are filled in as the build progresses. "Done (deployed)" means the code is live in AWS; checks run against the live deployment are recorded in `docs/evidence/m2-2026-10-22/`.
+`sources/cloud_quantum_seeded_monte_carlo.md`). Status and evidence are filled in as the build progresses. "Done (deployed)" means the code is live in AWS; checks run against the live deployment are recorded in `docs/evidence/m2-2026-10-22/`, and the benchmarks in `docs/evidence/m3-2026-10-22/`.
 Requirement IDs match `docs/PRD.md`.
 
 | ID | Requirement | Source | Status | Evidence |
@@ -31,10 +31,10 @@ Requirement IDs match `docs/PRD.md`.
 | EC-7 | Invalid inputs (non-positive sigma, T, paths; shards > paths; non-numeric) return 400 with a clear message | B:202-203 | Done (deployed) | All listed cases rejected with the field named (`tests/test_params.py`, 26 cases); the API returns them as 400 (`test_bad_input_is_400_naming_the_field`) |
 | EC-8 | terraform destroy removes everything; second plan after apply shows no drift | B:204-205 | Partial | Second `terraform plan` after the first apply: "No changes" (`docs/evidence/m2-2026-10-22/``checks.txt`). `terraform destroy` runs after grading |
 | EC-9 | Empty/first run: GET /jobs empty list; unknown id 404 | B:206-208 | Done (deployed) | Empty list and 404, as FR-7 and FR-8 |
-| NFR-1 | Submit latency < 800 ms p95 warm; 50 scripted submissions, report p50/p95 | B:214 | | |
-| NFR-2 | 1,000,000 paths in < 60 s, submit to COMPLETE, 5 runs | B:215 | | |
-| NFR-3 | $0 steady-state at 100 jobs/day of 1M paths; arithmetic shown | B:216 | | |
-| NFR-4 | terraform apply from empty < 10 min | B:217 | Partial | First apply from empty created 25 resources in about 84 seconds (one run, 22 Oct 2026) |
+| NFR-1 | Submit latency < 800 ms p95 warm; 50 scripted submissions, report p50/p95 | B:214 | Done | Measured 22 Oct 2026 with `scripts/bench_submit.py`: 50 warm submissions, all accepted. Client side 396.6 ms median (p50), 490.3 ms p95; inside the function 137 ms p50, 210 ms p95 (`docs/evidence/m3-2026-10-22/`) |
+| NFR-2 | 1,000,000 paths in < 60 s, submit to COMPLETE, 5 runs | B:215 | Done | Measured 22 Oct 2026 with `scripts/bench_job.py`: 5 runs, all COMPLETE, 3.08 s median and 3.85 s worst from the client; every estimate within 1.4 standard errors of Black-Scholes (`docs/evidence/m3-2026-10-22/`) |
+| NFR-3 | $0 steady-state at 100 jobs/day of 1M paths; arithmetic shown | B:216 | Done | `docs/COST.md`: per-job compute measured in the benchmarks (2.3 GB-seconds per 1M-path job). At 3,000 jobs a month: about 7% of free Lambda requests, 2% of free Lambda compute, up to 72% of free SQS requests (mostly idle polling), DynamoDB fixed at 15/25 units. $0 |
+| NFR-4 | terraform apply from empty < 10 min | B:217 | Done | First `terraform apply` into the empty account created 25 resources in about 84 seconds (22 Oct 2026, `docs/evidence/m2-2026-10-22/`). Not re-run: a rebuild would take the graded endpoint down and change its URL |
 | SEC-1 | QRYPT_API_KEY as SSM SecureString created out-of-band, not a Terraform variable; reason documented | B:234-236 | Done | Terraform refers to the parameters by name only, so the token is not in Terraform state (`infra/main.tf`; checked on the live state file: neither secret value appears). `scripts/put-secrets.sh` created both as SecureString in account 144249522427 without the values on a command line; tested against a fake `aws` command (`tests/test_put_secrets.py`) |
 | SEC-2 | One IAM role per function, least privilege, no wildcard actions or resources | B:237-238 | Partial | One role per function, actions listed one by one on named resources (`infra/modules/api`, `infra/modules/workers`); Checkov clean |
 | SEC-3 | Function URL with AWS_IAM or bearer key checked against SSM; no anonymous submission | B:239-240 | Done | Bearer key compared in constant time with the SSM value (`authorize` in `src/handlers/api.py`); `AWS_IAM` mode supported. Test: `test_missing_or_wrong_key_is_401`. Deployed: no key or a wrong key gets 401 |
@@ -49,15 +49,15 @@ Requirement IDs match `docs/PRD.md`.
 | CQ-6 | Function language one of Python/TS/Go/Rust; dependencies within Lambda package limits | B:128-129 | Done | Python 3.13, standard library only; nothing to package beyond our own code |
 | CQ-7 | Correctness by committed tests: closed form, seed determinism/uniqueness, bit-identical replay, idempotent aggregation | B:219-228 | Done | Closed form, seed determinism and uniqueness, bit-identical replay and duplicate-safe totals tested in-process; closed form and bit-identical replay also checked on the deployment |
 | CQ-8 | Always-free services only; no NAT, load balancer, EC2, RDS, Secrets Manager; Function URLs not API Gateway; provisioned DynamoDB; SQS long polling | B:99-119 | Partial | Terraform uses only always-free services: Lambda with Function URL, provisioned DynamoDB, SQS with long polling, SSM, CloudWatch, SNS, Budgets |
-| CQ-9 | Live Qrypt usage <= 10 MB total; token never committed; stored as QRYPT_API_KEY in local .env | B:64-67, B:94-97 | Ongoing | Tests use the mock source. Live use for the deployment checks: 2 requests of 1 KiB each. The token is kept only in git-ignored local files and SSM |
-| D-1 | Repository with README (GitLab instead of GitHub) | B:267 | | |
-| D-2 | AI_USAGE.md: tools, purposes, prompts/configuration that shaped the solution | B:259-263, B:267 | | |
+| CQ-9 | Live Qrypt usage <= 10 MB total; token never committed; stored as QRYPT_API_KEY in local .env | B:64-67, B:94-97 | Ongoing | Tests use the mock source. Live use so far: 61 KiB in 62 successful requests (deployment checks 2 KiB, benchmarks 58 KiB, fresh-clone check 1 KiB), against the 10,240 KiB cap. The token is kept only in git-ignored local files and SSM |
+| D-1 | Repository with README (GitLab instead of GitHub) | B:267 | Partial | `README.md` with grader quick-start. The repository is on GitLab (labs.gauntletai.com); the brief asks for GitHub, and no GitHub copy exists yet |
+| D-2 | AI_USAGE.md: tools, purposes, prompts/configuration that shaped the solution | B:259-263, B:267 | Done | `AI_USAGE.md` |
 | D-3 | .env.example and a mock Qrypt client so tests run without a token | B:268-269 | Done | `.env.example`; mock Qrypt source `MockEntropySource` in `src/qmc/entropy.py` |
-| D-4 | Architecture diagram (image or Mermaid) showing every AWS resource and data flow | B:270-271 | Partial | Mermaid diagram in `docs/DESIGN.md` |
-| D-5 | Grader quick-start: AWS credentials, SSM parameter, terraform apply, submit, replay, destroy | B:272-273 | Partial | README "Grader quick-start" |
-| D-6 | Cost note with free-tier arithmetic and Budget configuration screenshot | B:274-275 | | |
+| D-4 | Architecture diagram (image or Mermaid) showing every AWS resource and data flow | B:270-271 | Done | `docs/architecture.mmd` (Mermaid source) rendered to `docs/architecture.svg` and `docs/architecture.png`, shown in the README; every resource in the Terraform state appears in it |
+| D-5 | Grader quick-start: AWS credentials, SSM parameter, terraform apply, submit, replay, destroy | B:272-273 | Done | README "Grader quick-start": offline check, use of the deployed endpoint, and own deployment from credentials to destroy. Checked from a fresh clone on 22 Oct 2026 (offline tests, `terraform validate`, and health plus a small job against the live URL); the own-account deploy path was not repeated in a second account |
+| D-6 | Cost note with free-tier arithmetic and Budget configuration screenshot | B:274-275 | Partial | `docs/COST.md`: free-tier arithmetic for the reference load and the grading window, budget settings, actual spend $0.00. The Budget console screenshot is not added yet (marked place in the file) |
 | D-7 | Deployed endpoint URL kept up through grading, then destroyed | B:276 | Partial | Live at the URL in the README Status table since 22 Oct 2026; stays up through 26 Oct 2026 CT, then destroyed |
-| D-8 | One-line project description <= 120 characters | B:277-278 | | |
-| D-9 | Demo video <= 5 min: terraform apply, job to completion, Black-Scholes comparison, bit-identical replay, DLQ alarm firing | B:279-280 | | |
-| D-10 | Benchmark report with measured p50/p95, wall-clock, cost arithmetic, rebuild time | B:210-217 | | |
+| D-8 | One-line project description <= 120 characters | B:277-278 | Done | At the top of `README.md` (118 characters) |
+| D-9 | Demo video <= 5 min: terraform apply, job to completion, Black-Scholes comparison, bit-identical replay, DLQ alarm firing | B:279-280 | Not started | No video yet |
+| D-10 | Benchmark report with measured p50/p95, wall-clock, cost arithmetic, rebuild time | B:210-217 | Done | `docs/evidence/m3-2026-10-22/README.md` (latency, wall-clock, measured compute, rebuild time) and `docs/COST.md`. It also records two findings: Qrypt rejecting a third request within a second, and occasional shard write conflicts that cost one retry |
 | PRE-1 | Before the timebox: AWS account with billing alerts, working Qrypt token, Terraform and AWS CLI installed and authenticated | B:10-13 | Partial | AWS account (profile `qmc`), Qrypt token and tools ready. Lambda concurrency quota still 10; increase to 1,000 requested 22 Oct 2026 (support case 179270556400278, open) |
