@@ -2,3 +2,7 @@
 pytest==8.4.2
 pytest-cov==7.0.0
 ruff==0.14.1
+# Lambda's Python runtime already includes boto3; it is pinned here so the handler tests can run.
+boto3==1.43.118
+# moto fakes DynamoDB, SQS and SSM in memory for the handler tests (no AWS account needed).
+moto[dynamodb,sqs,ssm]==5.2.4

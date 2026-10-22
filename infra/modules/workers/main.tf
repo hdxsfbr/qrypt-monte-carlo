@@ -108,6 +108,7 @@ resource "aws_lambda_function" "worker" {
     variables = {
       QMC_ENV                = var.environment
       TABLE_NAME             = var.table_name
+      QUEUE_URL              = aws_sqs_queue.shards.url
       MAX_RECEIVE_COUNT      = tostring(var.max_receive_count)
       ENABLE_FAULT_INJECTION = var.fault_injection ? "true" : "false"
     }
