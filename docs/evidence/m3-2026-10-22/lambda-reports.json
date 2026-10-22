@@ -1,0 +1,70 @@
+{
+  "submit_bench_api": {
+    "function": "qmc-dev-api",
+    "window_utc": [
+      "2026-10-22T22:21:29+00:00",
+      "2026-10-22T22:23:12+00:00"
+    ],
+    "invocations": 51,
+    "duration_ms_p50": 137.0,
+    "duration_ms_p95": 210.1,
+    "duration_ms_max": 235.4,
+    "billed_ms_total": 7415,
+    "memory_mb": 512,
+    "max_memory_used_mb": 97,
+    "gb_seconds_total": 3.708,
+    "init_ms_values": []
+  },
+  "submit_bench_worker": {
+    "function": "qmc-dev-worker",
+    "window_utc": [
+      "2026-10-22T22:21:29+00:00",
+      "2026-10-22T22:23:15+00:00"
+    ],
+    "invocations": 51,
+    "duration_ms_p50": 42.4,
+    "duration_ms_p95": 62.0,
+    "duration_ms_max": 73.3,
+    "billed_ms_total": 2287,
+    "memory_mb": 1769,
+    "max_memory_used_mb": 89,
+    "gb_seconds_total": 3.951,
+    "init_ms_values": []
+  },
+  "job_bench_api": {
+    "function": "qmc-dev-api",
+    "window_utc": [
+      "2026-10-22T22:23:19+00:00",
+      "2026-10-22T22:23:50+00:00"
+    ],
+    "invocations": 25,
+    "duration_ms_p50": 6.7,
+    "duration_ms_p95": 149.4,
+    "duration_ms_max": 206.6,
+    "billed_ms_total": 939,
+    "memory_mb": 512,
+    "max_memory_used_mb": 97,
+    "gb_seconds_total": 0.469,
+    "init_ms_values": []
+  },
+  "job_bench_worker": {
+    "function": "qmc-dev-worker",
+    "window_utc": [
+      "2026-10-22T22:23:19+00:00",
+      "2026-10-22T22:23:50+00:00"
+    ],
+    "invocations": 55,
+    "duration_ms_p50": 84.4,
+    "duration_ms_p95": 264.8,
+    "duration_ms_max": 288.2,
+    "billed_ms_total": 6287,
+    "memory_mb": 1769,
+    "max_memory_used_mb": 91,
+    "gb_seconds_total": 10.861,
+    "init_ms_values": [
+      263,
+      267,
+      343
+    ]
+  }
+}

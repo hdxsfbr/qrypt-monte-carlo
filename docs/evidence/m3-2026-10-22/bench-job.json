@@ -1,0 +1,71 @@
+{
+  "benchmark": "NFR-2 job wall-clock, 1,000,000 paths in 10 shards",
+  "started_utc": "2026-10-22T22:23:20+00:00",
+  "job": {
+    "S0": 100,
+    "K": 100,
+    "r": 0.05,
+    "sigma": 0.2,
+    "T": 1,
+    "paths": 1000000,
+    "shards": 10
+  },
+  "runs": [
+    {
+      "job_id": "7a5f1f65-32ef-46b2-9874-3c9d12d497b1",
+      "status": "COMPLETE",
+      "client_s": 1.45,
+      "server_s": 0.94,
+      "estimate": 10.465275037989953,
+      "std_error": 0.01472880849432328,
+      "black_scholes": 10.450583572185565,
+      "error_in_se": 0.997
+    },
+    {
+      "job_id": "4b2b0ce6-f17c-455b-af1c-1d7802ceb519",
+      "status": "COMPLETE",
+      "client_s": 3.85,
+      "server_s": 3.114,
+      "estimate": 10.450287196270173,
+      "std_error": 0.014723040349803011,
+      "black_scholes": 10.450583572185565,
+      "error_in_se": -0.02
+    },
+    {
+      "job_id": "3a1f456f-8433-4b18-985f-4c6ae6dcc2cc",
+      "status": "COMPLETE",
+      "client_s": 3.75,
+      "server_s": 3.21,
+      "estimate": 10.469987118928245,
+      "std_error": 0.014739563521810169,
+      "black_scholes": 10.450583572185565,
+      "error_in_se": 1.316
+    },
+    {
+      "job_id": "5d14a8f6-8e2f-45bf-894f-ebd69491ea8d",
+      "status": "COMPLETE",
+      "client_s": 3.01,
+      "server_s": 2.236,
+      "estimate": 10.437973259343218,
+      "std_error": 0.014687169302375912,
+      "black_scholes": 10.450583572185565,
+      "error_in_se": -0.859
+    },
+    {
+      "job_id": "c1ee280d-f692-488b-b4fe-dd12f37da84d",
+      "status": "COMPLETE",
+      "client_s": 3.08,
+      "server_s": 2.209,
+      "estimate": 10.443618660135837,
+      "std_error": 0.014709249375359423,
+      "black_scholes": 10.450583572185565,
+      "error_in_se": -0.474
+    }
+  ],
+  "client_median_s": 3.08,
+  "client_worst_s": 3.85,
+  "server_median_s": 2.236,
+  "server_worst_s": 3.21,
+  "all_complete": true,
+  "qrypt_kib_used": 5
+}
