@@ -18,9 +18,10 @@ number service, splits into parallel pieces (*shards*), and stores everything ne
 | Requirements (`docs/PRD.md`, `docs/REQUIREMENTS_TRACE.md`) | Done |
 | Design (`docs/DESIGN.md`) | Approved |
 | Build, milestone M0 (engine, mock Qrypt client, CI, Terraform modules) | Done: 107 tests pass; Terraform checks clean |
-| Build, milestone M1 (the two functions, secrets script, command-line client) | Done in code: 141 tests pass, including the functions against simulated AWS services; not deployed |
-| Deploy and measure (milestone M2) | Next, after approval |
-| Deployed endpoint | Not deployed yet. No AWS resources have been created. |
+| Build, milestone M1 (the two functions, secrets script, command-line client) | Done: 141 tests pass, including the functions against simulated AWS services |
+| Deploy and measure (milestone M2) | Deployed 22 October 2026. Live checks passed: health, a 1,000,000-path job within 3 standard errors of Black-Scholes, bit-identical replay, a forced shard failure ending PARTIAL with the dead-letter-queue alarm firing and recovering, metrics and budget (`docs/evidence/m2-2026-10-22/`). Timing measurements (benchmarks) not done yet |
+| Deployed endpoint | `https://4z55v6fqv2s45myovdzkge4h2q0qxjpz.lambda-url.us-east-1.on.aws` (every request needs the API key; see Command-line client) |
+| CI | GitLab pipeline runs on every push (ruff, pytest, terraform validate, TFLint, Checkov); all passed for commit 739579a |
 
 ## AWS account, cost and grading window
 
@@ -80,7 +81,7 @@ the address that gets budget and alarm emails. AWS sends a confirmation email af
 link in it must be clicked before alerts arrive.
 
 **Concurrency** (how many copies of a function may run at once): the new account's Lambda limit is 10,
-and AWS refuses per-function reservations at that size. Until the requested increase to 1,000 is granted,
+and AWS refuses per-function reservations at that size. An increase to 1,000 was requested on 22 October 2026 (AWS support case 179270556400278, still open). Until it is granted,
 the deployment uses `reserve_concurrency = false` and `worker_concurrency = 5`: the queue starts at most 5
 workers at once, leaving room for the api function.
 
@@ -119,5 +120,26 @@ within 10 minutes; no result is given, and `failed_shards` lists them).
 
 ## Grader quick-start
 
-Added once the build is done: configure AWS credentials, store the SSM parameters, `terraform apply`,
-submit a job, replay it, `terraform destroy`.
+You need: AWS credentials for an account of your own (the commands below assume a CLI profile), Terraform
+1.9 or newer, Python 3.13, and a Qrypt token.
+
+```sh
+cp .env.example .env            # fill in QRYPT_API_KEY, and API_KEY (any random string of 32+ characters)
+cp infra/terraform.tfvars.example infra/terraform.tfvars   # set alert_email
+scripts/put-secrets.sh          # stores both secrets in SSM Parameter Store (see Storing the secrets)
+terraform -chdir=infra init
+terraform -chdir=infra apply    # about 1.5 minutes; prints function_url
+echo "QMC_URL=$(terraform -chdir=infra output -raw function_url)" >> .env
+scripts/qmc health
+scripts/qmc submit --paths 1000000 --shards 10 --wait   # compare estimate with black_scholes
+scripts/qmc replay <job id> --wait                     # bit_identical: true
+terraform -chdir=infra destroy  # removes everything; then delete the two SSM parameters
+```
+
+`put-secrets.sh` is pinned to this project's account (`144249522427`, profile `qmc`); in another account
+change `EXPECTED_ACCOUNT` and the `qmc` profile check in the script, and `allowed_account_ids` in `infra/variables.tf`.
+
+To repeat the forced-failure check, apply with `-var enable_fault_injection=true`, then
+`scripts/qmc submit --paths 100000 --shards 4 --fail-shards 2 --wait`; the job ends PARTIAL and the message
+reaches the dead-letter queue, which sets off the `qmc-dev-dlq-depth` alarm within about 5 minutes. Apply
+again without the variable to switch it off.
