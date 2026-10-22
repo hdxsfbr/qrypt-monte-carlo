@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Command-line client for the API. See `scripts/qmc --help` and src/qmc/cli.py.
+here="$(cd "$(dirname "$0")/.." && pwd)"
+PYTHONPATH="$here/src${PYTHONPATH:+:$PYTHONPATH}" exec python3 -m qmc.cli "$@"
