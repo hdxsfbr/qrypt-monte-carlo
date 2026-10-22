@@ -1,0 +1,4 @@
+# Development and CI only. Nothing here is shipped to Lambda.
+pytest==8.4.2
+pytest-cov==7.0.0
+ruff==0.14.1

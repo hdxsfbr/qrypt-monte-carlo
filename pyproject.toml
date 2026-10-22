@@ -1,0 +1,33 @@
+[project]
+name = "qrypt-monte-carlo"
+version = "0.1.0"
+description = "Quantum-seeded Monte Carlo option pricing on AWS Lambda (pure-Python engine)"
+requires-python = ">=3.13"
+dependencies = []  # the engine and handlers use only the Python standard library (plus boto3 provided by Lambda)
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+
+[tool.ruff]
+line-length = 110
+target-version = "py313"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM"]
+ignore = [
+  "S311",  # random.Random is used on purpose: seeded, reproducible simulation, not cryptography
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]  # assert is how pytest checks things
