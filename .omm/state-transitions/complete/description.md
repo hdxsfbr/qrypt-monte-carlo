@@ -1,0 +1,1 @@
+Terminal success: every shard DONE. worker.maybe_finish writes status, finished_at, result (estimate, std_error, CI, n, estimate_hex, std_errors_from_black_scholes), black_scholes and, for replays, replay_check. Eligible for replay.

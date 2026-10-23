@@ -1,0 +1,9 @@
+created: 2026-10-23T13:39:37.593Z
+updated: 2026-10-23T13:39:37.594Z
+update_count: 1
+last_field: description
+kind: nested-class
+title: health-route
+children: []
+parentPath:
+  - api-function

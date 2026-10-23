@@ -1,0 +1,1 @@
+Terminal failure with a list of failed_shards and finished_at, no result. Reached when a shard is recorded FAILED after its last attempt (worker), when fault injection forces failures, or when api.mark_stale finds shards still missing 10 minutes after creation (adds stale=true). Not replayable.

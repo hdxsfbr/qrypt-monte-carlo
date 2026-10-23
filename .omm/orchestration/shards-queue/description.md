@@ -1,0 +1,1 @@
+qmc-<env>-shards (infra/modules/workers/main.tf): SQS-managed SSE, visibility timeout = worker timeout x 6 (360 s by default), receive wait 20 s, retention 1 day, redrive policy to the DLQ with maxReceiveCount = max_receive_count (3).

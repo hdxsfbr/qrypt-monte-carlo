@@ -1,0 +1,1 @@
+Services outside the codebase that the platform depends on: the third-party Qrypt entropy API (the only non-AWS dependency, called by the API Lambda only) and the AWS managed services reached through boto3 clients cached per function instance (common.client) or configured purely in Terraform (SNS, Budgets, CloudWatch alarms and dashboard).

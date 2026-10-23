@@ -1,0 +1,1 @@
+External quantum random number service (https://api-eus.qrypt.com/api/v1/quantum-entropy). The API calls it once per new job with `?size=1` (1 KiB), a bearer token from SSM, a custom User-Agent and a 3-second timeout, one attempt. The response {"random": ["<base64>"]} must decode to exactly 1024 bytes. Accessed through QryptEntropySource in src/qmc/entropy.py.

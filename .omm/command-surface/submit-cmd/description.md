@@ -1,0 +1,1 @@
+`qmc submit [job flags] [--wait] [--timeout]`: POST /jobs with the body built by job_body (S0, K, r, sigma, T, paths, shards, optional fail_shards). Prints the 202 response, or with --wait the finished job.

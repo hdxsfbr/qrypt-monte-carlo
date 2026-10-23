@@ -1,0 +1,9 @@
+created: 2026-10-23T13:39:39.463Z
+updated: 2026-10-23T13:39:39.463Z
+update_count: 1
+last_field: description
+kind: nested-class
+title: secret-cache
+children: []
+parentPath:
+  - api-function

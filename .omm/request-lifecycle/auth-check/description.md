@@ -1,0 +1,1 @@
+api.authorize runs before any route logic. In BEARER mode it reads the API key from SSM (cached 5 min) and compares it to the bearer token in constant time; failure returns 401 {"error": "unauthorized"}. In AWS_IAM mode it is a no-op.

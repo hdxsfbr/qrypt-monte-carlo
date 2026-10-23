@@ -1,0 +1,1 @@
+`qmc wait JOB_ID [--timeout]` and the --wait option: cli.wait_for polls GET /jobs/{id} once per second, printing "<status>: completed/shards" to stderr, until COMPLETE or PARTIAL, or raises a CliError after the timeout.

@@ -1,0 +1,1 @@
+src/qmc/black_scholes.py. Closed-form European call price C = S0 N(d1) - K e^(-rT) N(d2) with N via math.erfc. Used as the reference the Monte Carlo estimate is checked against, in API responses and in the stored job result.

@@ -1,0 +1,1 @@
+The API Lambda has a 10 s timeout, and the Qrypt call has a 3 s timeout with a single attempt, so a submit stays well within the function limit even when Qrypt is slow. The response is 202 rather than 200 because the result is computed later by workers.

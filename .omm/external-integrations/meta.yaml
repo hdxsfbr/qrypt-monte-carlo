@@ -1,0 +1,14 @@
+created: 2026-10-23T13:43:11.998Z
+updated: 2026-10-23T13:43:19.482Z
+update_count: 5
+last_field: concern
+git_commit: b7b957a
+git_branch: docs/omm-architecture
+children:
+  - aws-cloudwatch
+  - aws-dynamodb
+  - aws-sns-budgets
+  - aws-sqs
+  - aws-ssm
+  - platform
+  - qrypt-api

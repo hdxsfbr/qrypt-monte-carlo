@@ -1,0 +1,1 @@
+entropy_factory().fetch(): one GET to Qrypt for 1 KiB with the token from SSM. On success the API records qrypt_ms in the log and builds seed_source {provider, kib, block_sha256, fetched_at}. On EntropyError it emits QryptErrors and returns 502 (401/403 from Qrypt) or 503 (429, outage, timeout, bad body) with the cause.

@@ -1,0 +1,13 @@
+graph LR
+    message-processor["Message Processor\nworker.py handler/process"]
+    shard-runner["Shard Runner\nworker.py run"]
+    retry-handler["Retry Handler\nworker.py retry_soon + failure path"]
+    job-finisher["Job Finisher\nworker.py maybe_finish/result_fields"]
+
+    message-processor -->|"job still QUEUED: simulate"| shard-runner
+    message-processor -->|"exception raised"| retry-handler
+    shard-runner -->|"after recording DONE shard"| job-finisher
+    retry-handler -->|"last attempt recorded FAILED"| job-finisher
+
+    classDef entry fill:#89b4fa,stroke:#89b4fa,color:#1e1e2e
+    class message-processor entry

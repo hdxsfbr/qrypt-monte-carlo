@@ -1,0 +1,12 @@
+created: 2026-10-23T13:39:58.667Z
+updated: 2026-10-23T13:40:02.881Z
+update_count: 3
+last_field: concern
+kind: nested-class
+title: jobs-table
+children:
+  - by-created-index
+  - job-items
+  - rate-items
+  - shard-items
+parentPath: []

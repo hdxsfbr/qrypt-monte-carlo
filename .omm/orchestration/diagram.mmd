@@ -1,0 +1,19 @@
+graph LR
+    publisher["Publisher\napi.py enqueue"]
+    shards-queue["Shards Queue\naws_sqs_queue.shards"]
+    event-source-mapping["Event Source Mapping\naws_lambda_event_source_mapping.shards"]
+    worker-consumer["Worker Consumer\nworker.py process"]
+    dead-letter-queue["Dead-Letter Queue\naws_sqs_queue.dlq"]
+
+    publisher -->|"SendMessageBatch, 10 per call, one message per shard"| shards-queue
+    shards-queue -->|"long poll 20 s"| event-source-mapping
+    event-source-mapping -->|"batch size 1, max concurrency = worker_concurrency"| worker-consumer
+    worker-consumer -->|"raise: ChangeMessageVisibility 2^attempt s, redelivery"| shards-queue
+    shards-queue -->|"redrive after max_receive_count deliveries"| dead-letter-queue
+
+    classDef entry fill:#89b4fa,stroke:#89b4fa,color:#1e1e2e
+    classDef store fill:#a6e3a1,stroke:#a6e3a1,color:#1e1e2e
+    classDef concern fill:#f38ba8,stroke:#f38ba8,color:#1e1e2e
+    class publisher entry
+    class shards-queue store
+    class dead-letter-queue concern

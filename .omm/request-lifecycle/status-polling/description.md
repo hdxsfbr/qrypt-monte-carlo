@@ -1,0 +1,1 @@
+Clients (e.g. `qmc submit --wait` / `qmc wait`) poll GET /jobs/{id} every second. api.get_job reads the job with a consistent read, shows QUEUED as RUNNING once any shard is in, lazily marks jobs PARTIAL after 10 minutes with missing shards, and returns the result and Black-Scholes reference when COMPLETE.

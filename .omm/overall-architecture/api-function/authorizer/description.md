@@ -1,0 +1,1 @@
+authorize() in src/handlers/api.py. With AUTH_TYPE=AWS_IAM it returns immediately because AWS validated the SigV4 signature before invocation. Otherwise it requires `Authorization: Bearer <key>` and compares it with the SSM API key using hmac.compare_digest (constant time); any mismatch raises 401.

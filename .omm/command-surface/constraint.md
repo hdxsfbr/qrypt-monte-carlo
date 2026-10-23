@@ -1,0 +1,1 @@
+The API key is only placed in the Authorization header and never printed; a placeholder key starting with "replace-with" is rejected. HTTP requests time out after 30 s. --fail-shards is hidden from help and only accepted by deployments with fault injection on.

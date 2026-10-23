@@ -1,0 +1,1 @@
+Initial stored status written by api.create_job for both new and replay jobs. The job remains QUEUED in storage throughout processing; counters show progress. Exits only via store.finish_job (conditional on QUEUED).

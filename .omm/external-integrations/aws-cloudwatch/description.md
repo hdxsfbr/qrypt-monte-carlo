@@ -1,0 +1,1 @@
+CloudWatch Logs (one log group per function, JSON log format, 14-day retention), custom metrics extracted from EMF log lines in namespace QMC, four metric alarms and the qmc-<env> dashboard. The functions never call the CloudWatch metrics API directly.

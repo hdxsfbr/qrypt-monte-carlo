@@ -1,0 +1,3 @@
+- In the default BEARER mode the Function URL is public; protection relies entirely on the bearer key check in code (constant-time compare) and the in-code rate limit.
+- A job whose shard messages are lost or never processed stays QUEUED until a GET after 10 minutes marks it PARTIAL; nothing finishes it proactively.
+- Worker concurrency and reserved concurrency depend on the account quota (10 on new accounts), which forces reserve_concurrency=false and a lower worker_concurrency.

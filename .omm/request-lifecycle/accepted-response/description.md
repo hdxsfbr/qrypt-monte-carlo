@@ -1,0 +1,1 @@
+api.accepted returns 202 {job_id, status QUEUED, shards, replay_of, links.self = /jobs/<id>} with content-type application/json and cache-control no-store. JobsSubmitted and EntropyKiB metrics and a "job submitted" log line are emitted.

@@ -1,0 +1,1 @@
+IAM role: GetItem/PutItem/UpdateItem/Query/ConditionCheckItem on the jobs table only (no index), receive/delete/visibility on the shard queue, its own log group. No SSM access and no Qrypt access: workers never see secrets. Fault injection (fail_shards) only takes effect when ENABLE_FAULT_INJECTION=true.

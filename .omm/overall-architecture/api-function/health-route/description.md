@@ -1,0 +1,1 @@
+health() in src/handlers/api.py. Checks that the DynamoDB table is ACTIVE (DescribeTable) and that both SSM parameters are readable without decryption. Returns 200 {status: ok} or 503 {status: degraded} with per-check results naming only the exception type.

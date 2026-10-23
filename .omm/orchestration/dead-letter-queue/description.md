@@ -1,0 +1,1 @@
+qmc-<env>-shards-dlq: holds shard messages that failed max_receive_count times, kept 14 days (the maximum) for inspection, SQS-managed SSE. Watched by the dlq-depth CloudWatch alarm and shown on the dashboard.

@@ -1,0 +1,1 @@
+CloudWatch dashboard qmc-<env> with five widgets: jobs submitted and shard failures; paths simulated; Qrypt entropy KiB and Qrypt errors; p95 duration of both Lambdas and ShardDurationMs; errors, worker throttles and DLQ depth.

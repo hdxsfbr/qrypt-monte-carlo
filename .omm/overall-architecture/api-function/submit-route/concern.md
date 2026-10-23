@@ -1,0 +1,1 @@
+The job item is written before the shard messages are queued. A failed batch raises 503 but leaves an orphan QUEUED job that only becomes PARTIAL via the lazy 10-minute staleness check. The rate slot is consumed even if the Qrypt call then fails.

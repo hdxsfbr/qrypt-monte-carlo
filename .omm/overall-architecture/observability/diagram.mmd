@@ -1,0 +1,12 @@
+graph LR
+    metric-emitter["Metric and Log Emitter\nsrc/handlers/common.py"]
+    alarms["CloudWatch Alarms\naws_cloudwatch_metric_alarm.this"]
+    dashboard["Dashboard\naws_cloudwatch_dashboard.main"]
+    alert-topic["Alert Topic\naws_sns_topic.alerts"]
+
+    metric-emitter -->|"EMF lines become QMC metrics"| alarms
+    metric-emitter -->|"QMC metrics graphed"| dashboard
+    alarms -->|"ALARM and OK actions"| alert-topic
+
+    classDef external fill:#585b70,stroke:#585b70,color:#cdd6f4
+    class alert-topic external

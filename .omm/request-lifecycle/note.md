@@ -1,0 +1,1 @@
+POST /jobs/{id}/replay follows the same lifecycle but skips input validation, rate limiting and entropy fetch: it reuses the original job's parameters and master seed (404 if missing, 409 if not COMPLETE).

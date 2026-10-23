@@ -1,0 +1,1 @@
+IAM role allows only GetItem/PutItem/UpdateItem/Query/DescribeTable on the jobs table and its by_created index, sqs:SendMessage on the shard queue, ssm:GetParameter on the two named parameters, and writes to its own log group. Request bodies are capped at 4096 bytes. Reserved concurrency (default 5) applies only when reserve_concurrency=true.

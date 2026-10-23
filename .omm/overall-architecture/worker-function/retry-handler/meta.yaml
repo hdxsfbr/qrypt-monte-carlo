@@ -1,0 +1,9 @@
+created: 2026-10-23T13:39:53.266Z
+updated: 2026-10-23T13:39:53.266Z
+update_count: 1
+last_field: description
+kind: nested-class
+title: retry-handler
+children: []
+parentPath:
+  - worker-function

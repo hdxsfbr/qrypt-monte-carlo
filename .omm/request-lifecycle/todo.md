@@ -1,0 +1,1 @@
+- No idempotency key on POST /jobs: a client retry after a timeout creates a second job and spends another KiB of entropy.

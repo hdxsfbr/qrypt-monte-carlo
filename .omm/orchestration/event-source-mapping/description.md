@@ -1,0 +1,1 @@
+aws_lambda_event_source_mapping.shards: connects the shards queue to the worker function with batch_size 1 and scaling_config.maximum_concurrency = worker_concurrency (default 20). Lambda deletes the message on success and leaves it for redelivery when the handler raises.

@@ -1,0 +1,9 @@
+created: 2026-10-23T13:40:44.487Z
+updated: 2026-10-23T13:40:52.495Z
+update_count: 3
+last_field: note
+kind: nested-class
+title: alarms
+children: []
+parentPath:
+  - observability

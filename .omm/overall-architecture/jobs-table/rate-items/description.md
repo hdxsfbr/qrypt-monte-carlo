@@ -1,0 +1,1 @@
+Fixed-window rate-limit counters (key RATE#<10-second window number> / RATE), updated by store.take_rate_slot with ADD count, condition count < 25. A refused update returns (False, seconds until next window). Each item carries ttl = (window + 6) * 10, so DynamoDB TTL deletes it about a minute later.

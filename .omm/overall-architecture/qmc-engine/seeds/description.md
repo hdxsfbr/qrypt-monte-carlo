@@ -1,0 +1,1 @@
+src/qmc/seeds.py. RFC 5869 HKDF-SHA256 implemented with hmac. master_seed_from_block takes the first 32 bytes of the Qrypt block; block_fingerprint is the SHA-256 of the whole block. shard_seed derives a 32-byte seed with salt = ALGO_VERSION and info = "shard" + index + count (4-byte big-endian each). The job id is excluded on purpose so replays reproduce the same shard seeds.

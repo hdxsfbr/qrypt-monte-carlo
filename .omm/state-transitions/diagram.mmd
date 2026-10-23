@@ -1,0 +1,18 @@
+graph LR
+    queued["QUEUED\nstored by api.create_job"]
+    running["RUNNING (view only)\napi.view"]
+    complete["COMPLETE\nworker.maybe_finish"]
+    partial["PARTIAL\nworker.maybe_finish / api.mark_stale"]
+
+    queued -->|"GET sees completed+failed > 0"| running
+    queued -->|"all shards DONE: finish_job if still QUEUED"| complete
+    queued -->|"all shards in, at least one FAILED"| partial
+    queued -->|"GET after 10 min with missing shards (stale)"| partial
+    running -->|"last shard recorded, none failed"| complete
+    running -->|"a shard exhausted retries"| partial
+    complete -->|"POST replay creates a new QUEUED job"| queued
+
+    classDef store fill:#a6e3a1,stroke:#a6e3a1,color:#1e1e2e
+    classDef concern fill:#f38ba8,stroke:#f38ba8,color:#1e1e2e
+    class complete store
+    class partial concern

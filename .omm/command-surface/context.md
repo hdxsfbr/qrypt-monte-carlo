@@ -1,0 +1,1 @@
+Intended for graders and the owner to exercise a deployment quickly. Settings come from QMC_URL and API_KEY in the environment, falling back to a .env file in the current directory (parsed as KEY=VALUE, never executed). Benchmarks in scripts/bench_*.py are separate tools.

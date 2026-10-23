@@ -1,0 +1,19 @@
+graph LR
+    router["Router\napi.py handler/route"]
+    authorizer["Authorizer\napi.py authorize"]
+    submit-route["Submit Route\napi.py submit/create_job/enqueue"]
+    replay-route["Replay Route\napi.py replay_job"]
+    job-read-routes["Job Read Routes\napi.py get_job/list_jobs/view/mark_stale"]
+    health-route["Health Route\napi.py health"]
+    secret-cache["Secret Cache\napi.py read_secret"]
+
+    router -->|"every request checked first"| authorizer
+    authorizer -->|"expected bearer key"| secret-cache
+    router -->|"POST /jobs"| submit-route
+    router -->|"POST /jobs/{id}/replay"| replay-route
+    router -->|"GET /jobs, GET /jobs/{id}"| job-read-routes
+    router -->|"GET /health"| health-route
+    submit-route -->|"Qrypt token for entropy fetch"| secret-cache
+
+    classDef entry fill:#89b4fa,stroke:#89b4fa,color:#1e1e2e
+    class router entry

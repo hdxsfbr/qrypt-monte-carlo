@@ -1,0 +1,1 @@
+Order matters: validation runs before the rate slot and the Qrypt call, so bad input never spends entropy or quota. Error bodies carry the failing field or cause but never internal details; 500s return only the request id.

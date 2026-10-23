@@ -1,0 +1,9 @@
+created: 2026-10-23T13:40:07.403Z
+updated: 2026-10-23T13:40:07.403Z
+update_count: 1
+last_field: description
+kind: nested-class
+title: shard-items
+children: []
+parentPath:
+  - jobs-table

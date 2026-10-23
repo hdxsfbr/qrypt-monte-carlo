@@ -1,0 +1,1 @@
+Functions run outside any VPC so they can reach Qrypt and AWS public endpoints without a NAT gateway (which is not free). Tests replace Qrypt with MockEntropySource and AWS with fake services (common.reset_clients clears cached clients between cases), so `make check` needs no token or account.

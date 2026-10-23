@@ -1,0 +1,1 @@
+read_secret() in src/handlers/api.py. Reads an SSM SecureString with decryption and caches it in a module-level dict for 300 s per function instance, so warm invocations do not call SSM on every request. Values are never logged. entropy_factory (default_entropy) builds a QryptEntropySource from the cached Qrypt token; tests swap the factory for a MockEntropySource.

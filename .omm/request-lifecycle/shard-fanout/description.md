@@ -1,0 +1,1 @@
+api.enqueue: qmc.pipeline.plan_shards splits paths across shards, then SendMessageBatch sends up to 10 messages per call to the shard queue. Any failed entry logs an error and raises 503 {"error": "could not queue all shards; try again", job_id}.

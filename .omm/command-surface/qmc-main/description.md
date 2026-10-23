@@ -1,0 +1,1 @@
+cli.main and cli.parser: builds the argparse tree (required subcommand), dispatches, prints results with show(), and converts CliError (missing settings, HTTP errors with the API's error message, unreachable URL, timeouts) into "qmc: <message>" on stderr and exit code 1.

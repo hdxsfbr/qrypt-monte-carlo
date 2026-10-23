@@ -1,0 +1,24 @@
+graph LR
+    function-url["Function URL\naws_lambda_function_url.api"]
+    auth-check["Auth Check\napi.py authorize"]
+    input-validation["Input Validation\napi.py read_body + qmc/params.py"]
+    rate-limiter["Rate Limiter\nstore.py take_rate_slot"]
+    entropy-fetch["Entropy Fetch\nqmc/entropy.py QryptEntropySource"]
+    job-creation["Job Creation\napi.py create_job + store.put_job"]
+    shard-fanout["Shard Fan-out\napi.py enqueue"]
+    accepted-response["202 Accepted\napi.py accepted"]
+    status-polling["Status Polling\napi.py get_job"]
+
+    function-url -->|"invoke handler with HTTP event"| auth-check
+    auth-check -->|"401 or continue"| input-validation
+    input-validation -->|"400 or JobRequest"| rate-limiter
+    rate-limiter -->|"429 Retry-After or slot taken"| entropy-fetch
+    entropy-fetch -->|"502/503 or 1 KiB block"| job-creation
+    job-creation -->|"job item QUEUED"| shard-fanout
+    shard-fanout -->|"503 on failed batch or all queued"| accepted-response
+    accepted-response -->|"client follows links.self"| status-polling
+
+    classDef entry fill:#89b4fa,stroke:#89b4fa,color:#1e1e2e
+    classDef external fill:#585b70,stroke:#585b70,color:#cdd6f4
+    class function-url entry
+    class entropy-fetch external

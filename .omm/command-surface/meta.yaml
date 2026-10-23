@@ -1,0 +1,15 @@
+created: 2026-10-23T13:42:47.210Z
+updated: 2026-10-23T13:42:54.272Z
+update_count: 5
+last_field: note
+git_commit: b7b957a
+git_branch: docs/omm-architecture
+children:
+  - get-cmd
+  - health-cmd
+  - list-cmd
+  - local-cmd
+  - qmc-main
+  - replay-cmd
+  - submit-cmd
+  - wait-cmd

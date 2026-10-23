@@ -1,0 +1,1 @@
+api.read_body decodes base64 bodies, caps size at 4096 bytes and parses JSON (400 on failure). qmc.params.validate_job_request then checks every field against Limits built from env (MAX_PATHS, MAX_SHARDS, MAX_PATHS_PER_SHARD, ENABLE_FAULT_INJECTION) and returns 400 {error, field} naming the first bad field.

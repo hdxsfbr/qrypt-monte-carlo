@@ -1,0 +1,1 @@
+Only 32 of the 1024 fetched bytes are used as the seed; the rest are only fingerprinted. Bit-identical replay also relies on the Python runtime keeping random.random() and math.exp/log/sin/cos behaviour stable, which is why the runtime is recorded with each job.

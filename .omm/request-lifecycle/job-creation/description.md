@@ -1,0 +1,1 @@
+api.create_job: new UUID4, master seed = first 32 bytes of the block, job item with status QUEUED, counters 0, algo_version, runtime python3.13, created_at/created_ts and GSI keys, written by store.put_job with a no-overwrite condition.

@@ -1,0 +1,1 @@
+Live Qrypt usage is capped: one 1 KiB call per new job, under 10 MB total for the assessment, and at most 25 calls per 10 s. Qrypt's edge blocks the default Python-urllib User-Agent, so requests send qrypt-monte-carlo/1.0. All AWS work happens in account 144249522427, us-east-1; Terraform's allowed_account_ids enforces this.

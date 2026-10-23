@@ -1,0 +1,32 @@
+graph LR
+    cli-client["CLI Client\nsrc/qmc/cli.py"]
+    api-function["API Lambda\nsrc/handlers/api.py + infra/modules/api"]
+    shard-queue["Shard Queue + DLQ\ninfra/modules/workers (SQS)"]
+    worker-function["Worker Lambda\nsrc/handlers/worker.py + infra/modules/workers"]
+    jobs-table["Jobs Table\nsrc/handlers/store.py + infra/modules/data"]
+    qmc-engine["QMC Engine\nsrc/qmc/"]
+    qrypt-service["Qrypt Entropy API\napi-eus.qrypt.com"]
+    ssm-parameters["SSM Parameter Store\n/qmc/dev/*"]
+    observability["Observability\ninfra/modules/observability"]
+    budget["Budget\ninfra/modules/budget"]
+
+    cli-client -->|"HTTPS + Bearer key via Function URL"| api-function
+    api-function -->|"read Qrypt token and API key"| ssm-parameters
+    api-function -->|"fetch 1 KiB entropy per new job"| qrypt-service
+    api-function -->|"put job, rate slot, list, get"| jobs-table
+    api-function -->|"SendMessageBatch, one message per shard"| shard-queue
+    api-function -->|"validate, seed, plan shards, Black-Scholes"| qmc-engine
+    shard-queue -->|"event source mapping, batch size 1"| worker-function
+    worker-function -->|"record shard + counter in one transaction, finish job"| jobs-table
+    worker-function -->|"derive shard seed, simulate, aggregate"| qmc-engine
+    api-function -->|"EMF metrics + JSON logs"| observability
+    worker-function -->|"EMF metrics + JSON logs"| observability
+    shard-queue -->|"DLQ depth alarm"| observability
+    budget -->|"budget alerts published to shared SNS topic"| observability
+
+    classDef external fill:#585b70,stroke:#585b70,color:#cdd6f4
+    classDef entry fill:#89b4fa,stroke:#89b4fa,color:#1e1e2e
+    classDef store fill:#a6e3a1,stroke:#a6e3a1,color:#1e1e2e
+    class qrypt-service,ssm-parameters external
+    class cli-client,api-function entry
+    class jobs-table,shard-queue store

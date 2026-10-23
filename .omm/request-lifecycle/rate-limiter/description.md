@@ -1,0 +1,1 @@
+store.take_rate_slot: conditional ADD on the RATE#<window> item in DynamoDB, allowing 25 new jobs per 10-second window across all API instances. When full, the API returns 429 with retry_after_s and a Retry-After header.
