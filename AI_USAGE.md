@@ -30,7 +30,8 @@ results were checked.
 | Creating the dedicated AWS Free plan account and signing the CLI into it; getting the Qrypt token | Andre |
 | Approvals: moving to the new account, `terraform apply` (deploy), enabling the CI runner for the project, requesting the Lambda concurrency increase from AWS, and running these submission tasks | Andre, each given in chat before the step was taken |
 | Live checks, benchmarks and evidence files in `docs/evidence/` | Executor ran the commands; the files are the real output |
-| Budget console screenshot and demo video | Andre (still to do at the time of writing) |
+| Budget console screenshot | Captured from the AWS Budgets console during the demo work; Andre approved it |
+| Demo video | Executor wrote the script and recorded the terminal scenes from real runs against a short-lived second copy of the stack (`qmc-demo`, destroyed afterwards); the narration is Andre's voice cloned by a text-to-speech tool, from a script he approved; Andre reviewed and uploaded the video |
 
 Git records every commit under Andre's name because the work was done in his repository with his git
 settings; the commits themselves were written by the executor.

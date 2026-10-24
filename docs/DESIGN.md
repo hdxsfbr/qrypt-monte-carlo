@@ -166,7 +166,7 @@ within a few minutes and the job shows `PARTIAL`. With the switch off (default),
 ## 7. Measurement method for each benchmark
 | Benchmark | How we measure | What we report |
 |-----------|----------------|----------------|
-| NFR-1 submit latency < 800 ms p95 warm | `scripts/bench_submit.py`: 1 warm-up call, then 50 `POST /jobs` (10,000 paths, 1 shard, to keep compute tiny), paced at 2 per second to respect the Qrypt limit. Client-side timing from the lab plus the server-side time logged by the function | p50 and p95 for both, network distance noted. Uses 51 KiB of entropy |
+| NFR-1 submit latency < 800 ms p95 warm | `scripts/bench_submit.py`: 1 warm-up call, then 50 `POST /jobs` (10,000 paths, 1 shard, to keep compute tiny), paced at one call every 2 seconds, because Qrypt rejected a third call within about a second. Client-side timing from the lab plus the server-side time logged by the function | p50 and p95 for both, network distance noted. Uses 51 KiB of entropy |
 | NFR-2 1M paths < 60 s | `scripts/bench_job.py`: 5 jobs of 1,000,000 paths × 10 shards; time from sending `POST /jobs` to first `COMPLETE` seen while polling every 0.5 s | each run, median, worst; also the error versus Black-Scholes in standard errors |
 | NFR-3 $0 at 100 jobs/day | Arithmetic in section 10, using *measured* durations from the NFR-2 runs (Lambda billed duration in the logs) | the table, with headroom per allowance |
 | NFR-4 rebuild < 10 min | `scripts/rebuild_timer.sh`: `terraform destroy`, then time `terraform apply` from empty | apply time; then `terraform plan` shows no changes |
@@ -293,9 +293,9 @@ like a product in the demo and the grader quick-start.
    Terraform variable `alert_email`. AWS sends a confirmation link that must be clicked.
 2. Region `us-east-1`: OK?
 3. Bearer key by default with `AWS_IAM` as a switch: OK? The deployed URL's key would be shared with
-   graders in the submission notes, not in the repo.
+   graders in the submission notes, not in the repo. *(Settled: bearer key; the key is not shared, graders do not need it.)*
 4. *(Settled.)* The project uses the new Free plan account, so the budget covers the whole account.
 5. *(Settled.)* The endpoint stays up through Monday 26 October 2026 (Central Time), then is destroyed.
-6. GitLab only, or also a GitHub mirror (the brief says GitHub)?
+6. *(Settled.)* GitLab only, by team decision (the brief says GitHub).
 7. Stretch picks above, and the `qmc` CLI: OK?
 8. Lambda concurrency quota: request an increase from 10 to 1,000 (free) so reserved concurrency works?

@@ -23,9 +23,10 @@ number service, splits into parallel pieces (*shards*), and stores everything ne
 | Build, milestone M1 (the two functions, secrets script, command-line client) | Done: 141 tests pass, including the functions against simulated AWS services |
 | Deploy and measure (milestone M2) | Deployed 22 October 2026. Live checks passed: health, a 1,000,000-path job within 3 standard errors of Black-Scholes, bit-identical replay, a forced shard failure ending PARTIAL with the dead-letter-queue alarm firing and recovering, metrics and budget (`docs/evidence/m2-2026-10-22/`) |
 | Benchmarks | Submit latency 397 ms median, 490 ms p95 (target under 800 ms); 1,000,000 paths in 3.1 s median, 3.9 s worst of 5 runs (target under 60 s). See Benchmarks below |
-| Submission documents | `AI_USAGE.md`, architecture diagram, cost note (`docs/COST.md`), submission checklist (`docs/SUBMISSION.md`). Still to add: Budget console screenshot and demo video |
-| Deployed endpoint | `https://4z55v6fqv2s45myovdzkge4h2q0qxjpz.lambda-url.us-east-1.on.aws` (every request needs the API key; see Command-line client) |
-| CI | GitLab pipeline runs on every push (ruff, pytest, terraform validate, TFLint, Checkov); all passed for commit a34dc73 |
+| Submission documents | `AI_USAGE.md`, architecture diagram, cost note with the Budget console screenshot (`docs/COST.md`), submission checklist (`docs/SUBMISSION.md`) |
+| Demo video | Recorded and uploaded (4 min 20 s): `terraform apply` of a short-lived second copy, a 1,000,000-path job, the Black-Scholes comparison, a bit-identical replay and the dead-letter-queue alarm firing. The link is given with the submission |
+| Deployed endpoint | `https://4z55v6fqv2s45myovdzkge4h2q0qxjpz.lambda-url.us-east-1.on.aws` (every request needs the API key, which is not published; graders do not need it, because the video and `docs/evidence/` show the live runs and the quick-start below deploys a private copy) |
+| CI | GitLab pipeline runs on every push (ruff, pytest, terraform validate, TFLint, Checkov); all passed for the submitted commit |
 
 ## AWS account, cost and grading window
 
@@ -50,6 +51,7 @@ number service, splits into parallel pieces (*shards*), and stores everything ne
 | [docs/REQUIREMENTS_TRACE.md](docs/REQUIREMENTS_TRACE.md) | Every requirement with its source line, status and evidence |
 | [docs/DESIGN.md](docs/DESIGN.md) | Architecture, diagram, data model, seed flow, error handling, measurement, security, tests, cost |
 | [docs/architecture.svg](docs/architecture.svg) | Architecture diagram: every AWS resource and data flow (source: [docs/architecture.mmd](docs/architecture.mmd); also as PNG) |
+| [docs/omm/](docs/omm/README.md) | Extra architecture views (system, request flow, workers, storage and more) generated from the code with oh-my-mermaid, an open-source diagram tool |
 | [docs/COST.md](docs/COST.md) | Cost note: always-free arithmetic for the reference load and the grading window, and the budget |
 | [AI_USAGE.md](AI_USAGE.md) | How AI tools were used, what shaped them, and how the results were checked |
 | [docs/SUBMISSION.md](docs/SUBMISSION.md) | Every item the brief asks for, mapped to where it is, with what is still missing |
@@ -119,7 +121,7 @@ the address that gets budget and alarm emails. AWS sends a confirmation email af
 link in it must be clicked before alerts arrive.
 
 **Concurrency** (how many copies of a function may run at once): the new account's Lambda limit is 10,
-and AWS refuses per-function reservations at that size. An increase to 1,000 was requested on 22 October 2026 (AWS support case 179270556400278, still open). Until it is granted,
+and AWS refuses per-function reservations at that size. An increase to 1,000 was requested on 22 October 2026 (AWS support case 179270556400278). Until it is granted,
 the deployment uses `reserve_concurrency = false` and `worker_concurrency = 5`: the queue starts at most 5
 workers at once, leaving room for the api function.
 
@@ -168,9 +170,10 @@ make venv && make test                                  # 141 tests
 scripts/qmc local --seed-hex $(printf 'ab%.0s' {1..32}) --paths 100000 --shards 4   # price on this machine
 ```
 
-**Against the deployed endpoint:** set `QMC_URL` to the address in the Status table and `API_KEY` to the key
-given with the submission (it is not in the repository), then `scripts/qmc health` and
-`scripts/qmc submit --paths 1000000 --shards 10 --wait`.
+**Against the deployed endpoint (optional):** the endpoint is protected by an API key that is not published,
+and grading does not need it. Anyone holding the key sets `QMC_URL` to the address in the Status table and
+`API_KEY` to the key, then runs `scripts/qmc health` and `scripts/qmc submit --paths 1000000 --shards 10 --wait`.
+Without a key every request gets `401 unauthorized`.
 
 **Your own deployment:**
 
