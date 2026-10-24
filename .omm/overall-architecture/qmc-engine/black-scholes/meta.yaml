@@ -1,0 +1,9 @@
+created: 2026-10-23T13:40:32.949Z
+updated: 2026-10-23T13:40:32.949Z
+update_count: 1
+last_field: description
+kind: nested-class
+title: black-scholes
+children: []
+parentPath:
+  - qmc-engine

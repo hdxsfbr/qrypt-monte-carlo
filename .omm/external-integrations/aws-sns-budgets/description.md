@@ -1,0 +1,1 @@
+SNS topic qmc-<env>-alerts with an email subscription, receiving CloudWatch alarm state changes and AWS Budgets notifications from the $1 monthly account budget. Configured only in Terraform (infra/modules/observability, infra/modules/budget); no application code calls them.

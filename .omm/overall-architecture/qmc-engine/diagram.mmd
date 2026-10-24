@@ -1,0 +1,16 @@
+graph LR
+    params["Params\nsrc/qmc/params.py"]
+    entropy["Entropy Sources\nsrc/qmc/entropy.py"]
+    seeds["Seeds\nsrc/qmc/seeds.py"]
+    simulate["Simulate\nsrc/qmc/simulate.py"]
+    aggregate["Aggregate\nsrc/qmc/aggregate.py"]
+    black-scholes["Black-Scholes\nsrc/qmc/black_scholes.py"]
+    pipeline["Pipeline\nsrc/qmc/pipeline.py"]
+
+    entropy -->|"1 KiB block becomes master seed"| seeds
+    pipeline -->|"shard_seed(master, index, count, version)"| seeds
+    pipeline -->|"simulate_shard / shard_path_counts"| simulate
+    pipeline -->|"combine in shard-index order"| aggregate
+    pipeline -->|"reference price for run_job"| black-scholes
+    simulate -->|"JobParams type"| params
+    aggregate -->|"ShardResult type"| simulate

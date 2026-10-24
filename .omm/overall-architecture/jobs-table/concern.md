@@ -1,0 +1,1 @@
+All jobs share the single GSI partition key "JOBS", a hot partition by design; acceptable at demo scale with 5 provisioned units. No point-in-time recovery (results can be recomputed from stored seeds).

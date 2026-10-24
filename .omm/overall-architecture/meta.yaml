@@ -1,0 +1,17 @@
+created: 2026-10-23T13:38:44.190Z
+updated: 2026-10-23T13:38:58.081Z
+update_count: 7
+last_field: note
+git_commit: b7b957a
+git_branch: docs/omm-architecture
+children:
+  - api-function
+  - budget
+  - cli-client
+  - jobs-table
+  - observability
+  - qmc-engine
+  - qrypt-service
+  - shard-queue
+  - ssm-parameters
+  - worker-function

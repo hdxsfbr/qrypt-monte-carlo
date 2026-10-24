@@ -1,0 +1,1 @@
+Progress is tracked by two counters on the job item (completed, failed), each incremented in the same DynamoDB transaction that writes the shard item. A job finishes when completed + failed equals shards. Each shard is DONE or FAILED; FAILED is only written on the last delivery attempt (ApproximateReceiveCount >= MAX_RECEIVE_COUNT).

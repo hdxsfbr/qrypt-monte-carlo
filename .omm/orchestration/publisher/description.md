@@ -1,0 +1,1 @@
+api.enqueue in src/handlers/api.py: turns plan_shards(params) into message bodies {job_id, shard_index, shard_count, paths} and sends them in batches of 10 (the SQS maximum), with entry Id = shard index. Raises 503 if any entry fails. Used by both POST /jobs and replay.

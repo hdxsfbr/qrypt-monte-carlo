@@ -1,0 +1,1 @@
+The `qmc` command-line client (src/qmc/cli.py, wrapper scripts/qmc), built on argparse and urllib only. Six subcommands map one-to-one to API routes or polling; `local` runs the engine in-process with no network. All output is pretty-printed JSON on stdout; progress lines and errors go to stderr; exit code 1 on any CliError.

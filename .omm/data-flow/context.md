@@ -1,0 +1,1 @@
+Shards are computed by independent Lambda instances in arbitrary order. Reproducibility is achieved by (1) deriving each shard's seed only from master seed, index, count and ALGO_VERSION, (2) storing shard sums as float.hex so no precision is lost through DynamoDB's decimal numbers, and (3) combining with math.fsum in shard-index order.

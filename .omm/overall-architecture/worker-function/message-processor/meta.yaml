@@ -1,0 +1,9 @@
+created: 2026-10-23T13:39:48.968Z
+updated: 2026-10-23T13:39:48.968Z
+update_count: 1
+last_field: description
+kind: nested-class
+title: message-processor
+children: []
+parentPath:
+  - worker-function

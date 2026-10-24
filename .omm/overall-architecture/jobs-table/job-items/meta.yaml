@@ -1,0 +1,9 @@
+created: 2026-10-23T13:40:05.034Z
+updated: 2026-10-23T13:40:05.034Z
+update_count: 1
+last_field: description
+kind: nested-class
+title: job-items
+children: []
+parentPath:
+  - jobs-table

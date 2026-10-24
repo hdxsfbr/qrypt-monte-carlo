@@ -1,0 +1,21 @@
+graph LR
+    entropy-block["Entropy Block\n1024 bytes from Qrypt"]
+    master-seed["Master Seed\nseeds.py master_seed_from_block"]
+    shard-seeds["Shard Seeds\nseeds.py shard_seed (HKDF)"]
+    shard-simulation["Shard Simulation\nsimulate.py simulate_shard"]
+    shard-results["Shard Results\nSHARD# items (float.hex)"]
+    job-estimate["Job Estimate\naggregate.py combine"]
+    replay-check["Replay Check\nworker.py result_fields"]
+
+    entropy-block -->|"first 32 bytes; SHA-256 of all kept as fingerprint"| master-seed
+    master-seed -->|"stored as master_seed_hex on the job"| shard-seeds
+    shard-seeds -->|"256-bit int seeds Mersenne Twister"| shard-simulation
+    shard-simulation -->|"sum, sum_sq, n"| shard-results
+    shard-results -->|"fsum in shard-index order, discount e^-rT"| job-estimate
+    job-estimate -->|"estimate_hex compared with original"| replay-check
+    master-seed -->|"replay reuses stored seed, no new entropy"| shard-seeds
+
+    classDef external fill:#585b70,stroke:#585b70,color:#cdd6f4
+    classDef store fill:#a6e3a1,stroke:#a6e3a1,color:#1e1e2e
+    class entropy-block external
+    class shard-results store

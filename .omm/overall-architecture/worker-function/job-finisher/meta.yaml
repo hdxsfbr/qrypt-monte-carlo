@@ -1,0 +1,9 @@
+created: 2026-10-23T13:39:55.605Z
+updated: 2026-10-23T13:39:55.606Z
+update_count: 1
+last_field: description
+kind: nested-class
+title: job-finisher
+children: []
+parentPath:
+  - worker-function

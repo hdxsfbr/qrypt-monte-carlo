@@ -1,0 +1,1 @@
+`qmc local --seed-hex <64 hex chars> [job flags]`: no network. Validates the parameters with the default limits and runs qmc.pipeline.run_job in-process, printing params, result and black_scholes. Reproduces a deployed job's estimate from its master_seed_hex.

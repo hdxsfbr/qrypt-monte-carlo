@@ -1,0 +1,1 @@
+Single DynamoDB table qmc-<env>-jobs (infra/modules/data/main.tf), provisioned capacity (default 10 RCU/WCU, plus 5/5 on the index = 15 of 25 always-free units), pk/sk string keys, TTL attribute `ttl`, deletion protection off so terraform destroy removes it. All access goes through src/handlers/store.py. Holds three item kinds plus one global secondary index.

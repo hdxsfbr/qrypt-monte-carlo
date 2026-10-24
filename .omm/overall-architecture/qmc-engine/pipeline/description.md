@@ -1,0 +1,1 @@
+src/qmc/pipeline.py. ShardTask (what one SQS message carries), plan_shards (params -> tasks), run_shard (version check, shard seed, simulate), aggregate (requires every shard, combines in index order) and run_job (whole job in one process, used by tests and `qmc local`). The API uses plan_shards; the worker uses run_shard and aggregate.

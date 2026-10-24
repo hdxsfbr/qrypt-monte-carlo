@@ -1,0 +1,1 @@
+With an account concurrency quota of 10, worker_concurrency must be lowered (5 suggested) and reserve_concurrency disabled; otherwise jobs with many shards queue up behind throttled workers. Messages in the DLQ are not automatically redriven; their job is already PARTIAL.

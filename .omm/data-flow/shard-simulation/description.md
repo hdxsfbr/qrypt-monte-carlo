@@ -1,0 +1,1 @@
+simulate.simulate_shard runs n paths (from shard_path_counts) with random.Random seeded by the shard seed, Box-Muller normals, terminal price under geometric Brownian motion and call payoff, accumulating sum and sum of squares of positive payoffs.

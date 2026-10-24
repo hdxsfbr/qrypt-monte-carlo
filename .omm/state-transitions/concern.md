@@ -1,0 +1,1 @@
+The stale transition only happens when someone GETs the job; GET /jobs (listing) does not trigger it, so an unread stale job can show QUEUED in listings indefinitely. If a slow shard finishes after a stale PARTIAL, its record is ignored because the job is already finished.

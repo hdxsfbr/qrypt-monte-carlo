@@ -1,0 +1,22 @@
+graph TD
+    qmc-main["qmc main\nsrc/qmc/cli.py main/parser"]
+    health-cmd["health\nGET /health"]
+    submit-cmd["submit\nPOST /jobs"]
+    get-cmd["get\nGET /jobs/{id}"]
+    list-cmd["list\nGET /jobs?limit&next"]
+    replay-cmd["replay\nPOST /jobs/{id}/replay"]
+    wait-cmd["wait\ncli.py wait_for"]
+    local-cmd["local\ncli.py run_local"]
+
+    qmc-main -->|"dispatch by subcommand"| health-cmd
+    qmc-main -->|"dispatch by subcommand"| submit-cmd
+    qmc-main -->|"dispatch by subcommand"| get-cmd
+    qmc-main -->|"dispatch by subcommand"| list-cmd
+    qmc-main -->|"dispatch by subcommand"| replay-cmd
+    qmc-main -->|"dispatch by subcommand"| wait-cmd
+    qmc-main -->|"dispatch by subcommand"| local-cmd
+    submit-cmd -->|"--wait polls until finished"| wait-cmd
+    replay-cmd -->|"--wait polls until finished"| wait-cmd
+
+    classDef entry fill:#89b4fa,stroke:#89b4fa,color:#1e1e2e
+    class qmc-main entry

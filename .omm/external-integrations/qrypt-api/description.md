@@ -1,0 +1,1 @@
+Qrypt quantum entropy REST API, US East endpoint. Called by QryptEntropySource (src/qmc/entropy.py) with Authorization: Bearer <token>, Accept: application/json, ?size=1. Status mapping: 401 -> qrypt_unauthorized/502, 403 -> qrypt_forbidden/502, 429 -> qrypt_rate_limited/503, other/timeout -> qrypt_unavailable/503, malformed body -> qrypt_bad_response/503.

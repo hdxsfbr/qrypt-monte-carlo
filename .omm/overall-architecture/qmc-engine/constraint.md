@@ -1,0 +1,1 @@
+Determinism: the result depends only on master seed, params, shard count/index and ALGO_VERSION, never on the clock, worker order or the job id. random.gauss is avoided (no cross-version guarantee); a custom Box-Muller over random.random() is used instead. Changing any numerical step requires bumping ALGO_VERSION; run_shard rejects unknown versions.

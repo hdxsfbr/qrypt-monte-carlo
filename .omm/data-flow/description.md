@@ -1,0 +1,1 @@
+How randomness and numbers move through a job: Qrypt entropy block -> 32-byte master seed -> per-shard HKDF seeds -> per-shard Monte Carlo sums -> exact shard records in DynamoDB -> combined estimate with standard error and 95% CI -> optional bit-identical replay check. Every step after the entropy fetch is a pure function of stored data, which is what makes jobs reproducible.

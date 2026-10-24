@@ -1,0 +1,1 @@
+handler() and process() in src/handlers/worker.py. Parses the SQS record body and ApproximateReceiveCount, loads the job (drops messages for unknown jobs, ignores messages for COMPLETE/PARTIAL jobs), and calls run(). On exception it logs, delegates to the failure path, and re-raises so SQS redelivers the message.

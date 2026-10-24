@@ -1,0 +1,1 @@
+SQS + Lambda was chosen over Step Functions to stay inside always-free allowances and the approved service list. Batch size 1 means one shard per invocation, so a single failure never forces a whole batch to be retried.

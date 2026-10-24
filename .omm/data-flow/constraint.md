@@ -1,0 +1,1 @@
+The job id is not an input to shard seed derivation (so replays match). Results must be bit-identical for the same master seed, params and ALGO_VERSION; the human-readable `sum` field is never used for aggregation, only sum_hex/sum_sq_hex.

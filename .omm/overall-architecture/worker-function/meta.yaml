@@ -1,0 +1,12 @@
+created: 2026-10-23T13:39:42.416Z
+updated: 2026-10-23T13:39:47.070Z
+update_count: 3
+last_field: constraint
+kind: nested-class
+title: worker-function
+children:
+  - job-finisher
+  - message-processor
+  - retry-handler
+  - shard-runner
+parentPath: []

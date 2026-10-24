@@ -1,0 +1,1 @@
+SQS standard queues are at-least-once: duplicate deliveries must be harmless, which store.record_shard guarantees with a conditional Put inside a transaction. The queue visibility timeout (6 x worker timeout) must exceed the worker timeout. scaling_config.maximum_concurrency must be between 2 and 1000.

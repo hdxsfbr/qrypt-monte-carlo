@@ -1,0 +1,1 @@
+Four CloudWatch alarms, 60 s period, 1 evaluation period, threshold > 0, missing data not breaching, alarm and OK actions to the SNS topic: worker-errors (AWS/Lambda Errors on the worker), dlq-depth (max ApproximateNumberOfMessagesVisible on the DLQ), api-errors (AWS/Lambda Errors on the API), qrypt-errors (custom QMC QryptErrors).

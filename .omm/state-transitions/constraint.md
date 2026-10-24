@@ -1,0 +1,1 @@
+A job is never COMPLETE with missing or failed shards, and never waits forever: either the last worker finishes it or a GET after 10 minutes (STALE_AFTER_S) marks it PARTIAL with stale=true. Only COMPLETE jobs can be replayed (409 otherwise). Workers ignore messages for finished jobs.

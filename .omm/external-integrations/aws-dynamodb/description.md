@@ -1,0 +1,1 @@
+Provisioned-capacity DynamoDB table with the by_created GSI and TTL. Accessed with the low-level boto3 client and TypeSerializer/TypeDeserializer in src/handlers/store.py: PutItem, GetItem (consistent), UpdateItem (conditional), Query, TransactWriteItems, DescribeTable.

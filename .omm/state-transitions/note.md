@@ -1,0 +1,1 @@
+Fault injection (fail_shards, only when enable_fault_injection=true) is the supported way to drive a job to PARTIAL on purpose for demos: the listed shards raise InjectedFailure on every attempt, exhaust retries and land in the DLQ.

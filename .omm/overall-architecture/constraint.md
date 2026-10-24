@@ -1,0 +1,6 @@
+- src/qmc must never call AWS; only src/handlers touches boto3.
+- Secrets (Qrypt token, API bearer key) live only in SSM SecureStrings created out-of-band; Terraform references them by name only so values never reach state.
+- No fallback randomness: if Qrypt fails, the job is refused (502/503), never seeded from a local source.
+- One Qrypt call (1 KiB) per new job; replays make none. Rate limit 25 Qrypt calls per 10 s window, below Qrypt's 30.
+- Limits: at most 10M paths, 20 shards, 500k paths per shard (Terraform variables passed as env).
+- Any change to the numerical recipe must bump ALGO_VERSION (qmc-v1).

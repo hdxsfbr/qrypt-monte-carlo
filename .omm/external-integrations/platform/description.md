@@ -1,0 +1,1 @@
+The two Lambda functions (src/handlers/api.py, src/handlers/worker.py) and their shared helpers (common.py, store.py), deployed from a single zip of src/. Only the API calls Qrypt and SSM; both call DynamoDB, SQS and CloudWatch (via stdout).

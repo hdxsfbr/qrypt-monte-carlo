@@ -1,0 +1,1 @@
+SNS topic qmc-<env>-alerts with an email subscription to alert_email (alerts arrive only after the confirmation link is clicked). Unencrypted on purpose: CloudWatch alarms and AWS Budgets cannot publish to a topic encrypted with the default aws/sns key. Its access policy is set by the budget module to allow cloudwatch.amazonaws.com and budgets.amazonaws.com from this account.

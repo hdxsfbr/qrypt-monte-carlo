@@ -1,0 +1,1 @@
+The whole src/ directory is zipped once by Terraform's archive_file and deployed as the code package for both Lambdas (handlers.api.handler and handlers.worker.handler). pipeline.run_job runs the same steps in one process for tests and `qmc local`, which yields the same numbers as the distributed path.

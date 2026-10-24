@@ -1,0 +1,1 @@
+Qrypt allows 30 requests per 10 s; the API caps itself at 25 via a DynamoDB counter. The assessment budget is under 10 MB of entropy in total. 401/403 map to 502 for the caller; 429, other errors, timeouts and unreadable bodies map to 503.

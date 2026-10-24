@@ -1,0 +1,11 @@
+graph TD
+    job-items["Job Items\npk JOB#id / sk META"]
+    shard-items["Shard Items\npk JOB#id / sk SHARD#0007"]
+    rate-items["Rate-Limit Items\npk RATE#window / sk RATE"]
+    by-created-index["by_created GSI\ngsi1pk JOBS / gsi1sk created_at#id"]
+
+    shard-items -->|"transaction increments completed/failed on"| job-items
+    job-items -->|"projected (ALL) for newest-first listing"| by-created-index
+
+    classDef store fill:#a6e3a1,stroke:#a6e3a1,color:#1e1e2e
+    class job-items,shard-items,rate-items,by-created-index store

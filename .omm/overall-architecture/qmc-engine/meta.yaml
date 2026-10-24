@@ -1,0 +1,15 @@
+created: 2026-10-23T13:40:14.007Z
+updated: 2026-10-23T13:40:19.507Z
+update_count: 3
+last_field: constraint
+kind: nested-class
+title: qmc-engine
+children:
+  - aggregate
+  - black-scholes
+  - entropy
+  - params
+  - pipeline
+  - seeds
+  - simulate
+parentPath: []

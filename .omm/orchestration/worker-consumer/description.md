@@ -1,0 +1,1 @@
+worker.process in src/handlers/worker.py: reads ApproximateReceiveCount as the attempt number, runs the shard, and on failure calls retry_soon (visibility 2, 4, 8 ... s, max 300) before re-raising. On the last attempt it records the shard FAILED first so the job can finish PARTIAL. The last successful or failed shard triggers maybe_finish (fan-in).

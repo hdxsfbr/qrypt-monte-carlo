@@ -1,0 +1,16 @@
+created: 2026-10-23T13:40:57.501Z
+updated: 2026-10-23T13:41:07.861Z
+update_count: 7
+last_field: note
+git_commit: b7b957a
+git_branch: docs/omm-architecture
+children:
+  - accepted-response
+  - auth-check
+  - entropy-fetch
+  - function-url
+  - input-validation
+  - job-creation
+  - rate-limiter
+  - shard-fanout
+  - status-polling

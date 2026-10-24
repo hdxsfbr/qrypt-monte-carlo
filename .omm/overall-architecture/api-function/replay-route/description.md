@@ -1,0 +1,1 @@
+replay_job() in src/handlers/api.py. Loads the original job; 404 if missing, 409 unless it is COMPLETE. Creates a new job via create_job with the original parameters, master seed and algo_version, seed_source {replay_of}, and no Qrypt call (EntropyKiB metric 0). The worker later adds a replay_check comparing estimate_hex with the original for bit-identical reproducibility.

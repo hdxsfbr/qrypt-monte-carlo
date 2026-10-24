@@ -1,0 +1,1 @@
+Global secondary index by_created (hash gsi1pk, range gsi1sk, projection ALL, default 5/5 provisioned units). Only job items carry gsi1pk="JOBS" and gsi1sk="<created_at>#<job_id>", so store.list_jobs queries it with ScanIndexForward=false for newest-first pages. LastEvaluatedKey is exposed to callers as a base64 JSON page token.

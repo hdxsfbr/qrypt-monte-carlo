@@ -1,0 +1,1 @@
+Side effects are not atomic across stages: a rate slot is consumed before Qrypt is called, and the job item is persisted before shards are queued, so a later-stage failure leaves earlier effects in place.

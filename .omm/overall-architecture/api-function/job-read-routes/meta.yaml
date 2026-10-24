@@ -1,0 +1,9 @@
+created: 2026-10-23T13:39:36.103Z
+updated: 2026-10-23T13:39:36.103Z
+update_count: 1
+last_field: description
+kind: nested-class
+title: job-read-routes
+children: []
+parentPath:
+  - api-function

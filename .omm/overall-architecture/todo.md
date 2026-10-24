@@ -1,0 +1,1 @@
+- No background sweeper for stale QUEUED jobs; staleness is only detected lazily on GET /jobs/{id}.

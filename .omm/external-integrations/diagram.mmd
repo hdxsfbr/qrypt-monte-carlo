@@ -1,0 +1,20 @@
+graph LR
+    platform["QMC Platform\nsrc/handlers/"]
+    qrypt-api["Qrypt Quantum Entropy\napi-eus.qrypt.com/api/v1/quantum-entropy"]
+    aws-ssm["AWS SSM Parameter Store\nSecureString x2"]
+    aws-dynamodb["AWS DynamoDB\nqmc-env-jobs"]
+    aws-sqs["AWS SQS\nshards + DLQ"]
+    aws-cloudwatch["AWS CloudWatch\nlogs, EMF metrics, alarms"]
+    aws-sns-budgets["AWS SNS + Budgets\nalert email"]
+
+    platform -->|"HTTPS GET size=1, Bearer token, 3 s timeout"| qrypt-api
+    platform -->|"GetParameter (decrypt) for Qrypt token and API key"| aws-ssm
+    platform -->|"boto3 low-level client: items, transactions, GSI query"| aws-dynamodb
+    platform -->|"SendMessageBatch, ChangeMessageVisibility"| aws-sqs
+    platform -->|"stdout JSON logs and EMF lines"| aws-cloudwatch
+    aws-cloudwatch -->|"alarm notifications"| aws-sns-budgets
+
+    classDef external fill:#585b70,stroke:#585b70,color:#cdd6f4
+    classDef entry fill:#89b4fa,stroke:#89b4fa,color:#1e1e2e
+    class qrypt-api,aws-ssm,aws-dynamodb,aws-sqs,aws-cloudwatch,aws-sns-budgets external
+    class platform entry
