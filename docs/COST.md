@@ -78,11 +78,10 @@ figures up to about three times a day, so a charge can take several hours to sho
 
 ### Budget console screenshot
 
-> **TO ADD:** screenshot of the `qmc-dev-monthly` budget in the AWS Billing console, saved as
-> `docs/images/budget-console.png`. Not captured yet; this space is intentionally empty until the real
-> screenshot is added.
+The `qmc-dev-monthly` budget in the AWS Billing console (AWS Budgets page), captured on 22 October 2026:
+limit $1.00, amount used $0.00, thresholds OK, health status Healthy.
 
-<!-- After adding the file, replace the box above with: ![qmc-dev-monthly budget in the AWS console](images/budget-console.png) -->
+![qmc-dev-monthly budget in the AWS Budgets console: $1.00 limit, $0.00 used, thresholds OK, Healthy](images/budget-console.png)
 
 ## After grading
 
