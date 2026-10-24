@@ -51,7 +51,7 @@ number service, splits into parallel pieces (*shards*), and stores everything ne
 | [docs/REQUIREMENTS_TRACE.md](docs/REQUIREMENTS_TRACE.md) | Every requirement with its source line, status and evidence |
 | [docs/DESIGN.md](docs/DESIGN.md) | Architecture, diagram, data model, seed flow, error handling, measurement, security, tests, cost |
 | [docs/architecture.svg](docs/architecture.svg) | Architecture diagram: every AWS resource and data flow (source: [docs/architecture.mmd](docs/architecture.mmd); also as PNG) |
-| [docs/omm/](docs/omm/README.md) | Extra architecture views (system, request flow, workers, storage and more) generated from the code with oh-my-mermaid, an open-source diagram tool |
+| [docs/omm/](docs/omm/README.md) | Extra architecture views (overall system, request lifecycle, data flow, job states, external services and more) generated from the code with oh-my-mermaid, an open-source diagram tool |
 | [docs/COST.md](docs/COST.md) | Cost note: always-free arithmetic for the reference load and the grading window, and the budget |
 | [AI_USAGE.md](AI_USAGE.md) | How AI tools were used, what shaped them, and how the results were checked |
 | [docs/SUBMISSION.md](docs/SUBMISSION.md) | Every item the brief asks for, mapped to where it is, with what is still missing |
